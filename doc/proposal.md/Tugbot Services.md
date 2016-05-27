@@ -12,7 +12,7 @@ Everything below is subject to change, see it as a starting point only.
 
 User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regullary to deploy and run application containers. The **Tugbot** does not force user to learn a new paradigm for deplyment and execition of Docker containers. Use whatever tool you are already using!
 
-**Tugbot** permorms **next** *test container* execution(s) on specified *event*. This can be timer event (every 20 min), Docker event (create, run, others...) or other events (in the future) like package update, kernel update, configuration change, etc. **Tagbot** also collects test results, and it tries to do so also for first *test container* run too.
+**Tugbot** performs **next** *test container* execution(s) on specified *event*. This can be timer event (every 20 min), Docker event (create, run, others...) or other events (in the future) like package update, kernel update, configuration change, etc. **Tagbot** also collects test results, and it tries to do so also for first *test container* run too.
 
 ### Result Service
 
