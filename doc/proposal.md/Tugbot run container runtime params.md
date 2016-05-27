@@ -58,3 +58,12 @@ WantedBy=multi-user.target
 [X-Fleet]
 Global=true
 ```
+In the example above, the fleet service docker run actually execute *ps -ef > /dev/null* which will exist immidiate after execution
+*tugbot run* will then grab the terminated container and will start to manage it.
+
+
+# Benefits from the proposed solution
+
+1. A unified interface between fleet-docker-tugbot
+2. We still validate that all of docker runtime params are acually ok before tugbot gets into the picture.
+3. Minimal extra configuration for tugbot needs.
