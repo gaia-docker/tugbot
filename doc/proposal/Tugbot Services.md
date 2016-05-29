@@ -5,6 +5,7 @@ Everything below is subject to change, see it as a starting point only.
 ## Tugbot Framework
 
 **Tagbot** is an Integration Testing Framework for Docker based production/staging/testing environment. The **Tagbot** Framework performs two core tasks:
+
 1. Orchestrate *test containers* execution, triggered by some *event* (see below)
 2. Continuously collect test results and upload them to some **Result Service** (more about it later)
 
