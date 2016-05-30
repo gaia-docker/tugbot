@@ -1,19 +1,19 @@
-# Tagbot Proposal Draft
+# Tugbot Proposal Draft
 
 Everything below is subject to change, see it as a starting point only.
 
 ## Tugbot Framework
 
-**Tagbot** is an Integration Testing Framework for Docker based production/staging/testing environment. The **Tagbot** Framework performs two core tasks:
+**Tugbot** is an Integration Testing Framework for Docker based production/staging/testing environment. The **Tugbot** Framework performs two core tasks:
 
 1. Orchestrate *test containers* execution, triggered by some *event* (see below)
 2. Continuously collect test results and upload them to some **Result Service** (more about it later)
 
-> **Tagbot** should not change the way users deploy and run Docker container.
+> **Tugbot** should not change the way users deploy and run Docker container.
 
-**Tagbot** is not responsible to **first** run of *test container*! User should use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
+**Tugbot** is not responsible to **first** run of *test container*! User should use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
 
-**Tugbot** performs **subsequent** *test container* execution(s), triggered by subscribed *event*. The event can be timer event (every 20 min), Docker event (create, run, others...) or some other events (in the future), like package update, kernel update, configuration change, etc. **Tagbot** automatically handles collection of test results. It will try to do so even for first *test container* run.
+**Tugbot** performs **subsequent** *test container* execution(s), triggered by subscribed *event*. The event can be timer event (every 20 min), Docker event (create, run, others...) or some other events (in the future), like package update, kernel update, configuration change, etc. **Tugbot** automatically handles collection of test results. It will try to do so even for first *test container* run.
 
 ### Result Service
 
@@ -21,16 +21,16 @@ The **Result Service** is a web service, that implements [Result Service API](#T
 
 ### Tugbot Packaging
 
-**Tugbot** framework consists from several services, currently two: `watch` and `run`. For the first version and in sake of simplicity, we package both services into a single binary file. **Tagbot** binary can be deployed as a native application or as a Docker image.
+**Tugbot** framework consists from several services, currently two: `watch` and `run`. For the first version and in sake of simplicity, we package both services into a single binary file. **Tugbot** binary can be deployed as a native application or as a Docker image.
 The **Tugbot** Docker image is based on Alpine Linux and contains the above single binary: `tugbot`
 
 ## Test Container
 
 *Test container* is a regular Docker container. We use Docker `LABEL` to discover *test container* and **Tugbot** related test metadata. These labels can be part of image or can be specified at runtime, using `--label` `docker run` option.
-**Tugbot** will trigger a sequential *test container* execution on *event* (see `tagbot.event.*` labels).
+**Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot.event.*` labels).
 
-### Tagbot labels
-All **Tugbot** labels must be prefixed with `tagbot.` to avoid potential conflict with other labels.
+### Tugbot labels
+All **Tugbot** labels must be prefixed with `Tugbot.` to avoid potential conflict with other labels.
 
 - `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
 - `tugbot.results` - directory, where *test container* reports test results; default to `/var/tests/results`
@@ -65,9 +65,9 @@ The basic idea it to get file system modification events, such as "directory cre
 tugbot orchestrate ... [container, container ...]
 ```
 
-`orchestrate` - orchestrate execution of specified *test containers*, based on further configuration. If no container specified, **Tagbot** will orchestrate tests for all automatically discovered *test containers* on Docker host, where it runs.
+`orchestrate` - orchestrate execution of specified *test containers*, based on further configuration. If no container specified, **Tugbot** will orchestrate tests for all automatically discovered *test containers* on Docker host, where it runs.
 
-By default, **Tagbot** inspects *test container* configuration: to know when to run *test container* and where to look for test results. This configuration can be also specified at runtime and can overwrite "default" configuration.
+By default, **Tugbot** inspects *test container* configuration: to know when to run *test container* and where to look for test results. This configuration can be also specified at runtime and can overwrite "default" configuration.
 
 ### Orchestrate Options
 
@@ -80,4 +80,4 @@ By default, **Tagbot** inspects *test container* configuration: to know when to 
 * `--tlskey` Client key for TLS authentication. Used in conjunction with the `--tls` or `--tlsverify` flags to identify the key to use for client authentication. The value for this flag can be either the fully-qualified path to the *.pem* file containing the client key or a string containing the key itself. Defaults to "/etc/ssl/docker/key.pem".
 * `--debug` Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
 * `--help` Show documentation about the supported flags.
-* `--version, -v` Print **Tagbot** version
+* `--version, -v` Print **Tugbot** version
