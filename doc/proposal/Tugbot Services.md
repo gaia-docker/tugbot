@@ -16,7 +16,7 @@ User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kube
 
 ### Result Service
 
-The **Result Service** is a web service, that implements [Result Service API](#TODO). We will provide an open source **Result Service** implementation, that can be run on AWS Cloud, using API Gateway, Lambda and S3.
+The **Result Service** is a web service, that implements [Result Service API](Result Service API.md). We will provide an open source **Result Service** implementation, that can be run on AWS Cloud, using API Gateway, Lambda and S3.
 
 ### Tugbot Packaging
 
