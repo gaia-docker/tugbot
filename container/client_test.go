@@ -425,7 +425,7 @@ func TestRemoveImage_Error(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("RemoveImage", "abc123").Return([]*dockerclient.ImageDelete{}, errors.New("oops"))
+	api.On("RemoveImage", "abc123", true).Return([]*dockerclient.ImageDelete{}, errors.New("oops"))
 
 	client := dockerClient{api: api}
 	err := client.RemoveImage(c)
