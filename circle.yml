@@ -16,13 +16,13 @@ dependencies:
     - docker build -t gaiadocker/tugbot-builder -f Dockerfile.build .
     # run go build in a docker container
     - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/go_build.sh
-    # create mr-burns docker image
+    # create tugbot docker image
     - docker build -t gaiadocker/tugbot .
     - docker tag gaiadocker/tugbot gaiadocker/tugbot:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
     - docker tag gaiadocker/tugbot gaiadocker/tugbot:$CIRCLE_BRANCH
 test:
   override:
-    # run mr-burns tests and generate junit.xml reports
+    # run tugbot tests and generate junit.xml reports
     - docker run --rm -e "COVERALLS_TOKEN=${COVERALLS_TOKEN}" -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/coverage.sh --coveralls
   post:
     # copy test results
