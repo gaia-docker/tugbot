@@ -5,7 +5,6 @@ import (
 	"github.com/gaia-docker/tugbot/container"
 )
 
-
 // Run looks at the running Docker containers to see if any of the images
 // used to start those containers is a test container.
 // For each test container it'll create and start a new container according
@@ -13,7 +12,13 @@ import (
 func Run(client container.Client, names []string) error {
 
 	log.Info("Checking containers for running tests")
-	for _, c := range client.ListContainers(containerFilter(names)) {
+
+	containers, err := client.ListContainers(containerFilter(names))
+	if err != nil {
+		return err
+	}
+
+	for _, c := range containers {
 		log.Debug(c)
 	}
 
