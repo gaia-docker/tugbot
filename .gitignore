@@ -1,0 +1,6 @@
+.git
+.cover
+.dist
+vendor
+.idea
+container_settings.json
