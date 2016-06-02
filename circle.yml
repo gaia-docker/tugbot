@@ -11,7 +11,7 @@ checkout:
     - export RELEASE_TAG=$(git describe --tags)
 dependencies:
   override:
-    - chmod u+x script/go_build.sh script/go_test.sh
+    - chmod u+x script/go_build.sh script/coverage.sh
     # create builder image
     - docker build -t gaiadocker/tugbot-builder -f Dockerfile.build .
     # run go build in a docker container
