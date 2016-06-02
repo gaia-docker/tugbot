@@ -1,0 +1,30 @@
+FROM golang:1.6-alpine
+
+ENV TUGBOT_DIR /go/src/github.com/gaia-docker/tugbot
+WORKDIR $TUGBOT_DIR
+
+# install Git apk
+RUN apk --update add git bash \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /var/cache/apk/*
+
+# install glide package manager
+RUN curl -Ls https://github.com/Masterminds/glide/releases/download/0.10.1/glide-0.10.1-linux-amd64.tar.gz | tar xz -C /tmp \
+ && mv /tmp/linux-amd64/glide /usr/bin/
+
+# gox - Go cross compile tool
+RUN go get -v github.com/mitchellh/gox
+
+# goveralls - Go integration for Coveralls.io
+RUN go get -v github.com/mattn/goveralls
+
+# cover - Go code coverage tool
+RUN go get -v golang.org/x/tools/cmd/cover
+
+# go-junit-report - convert Go test into junit.xml format
+RUN go get -v github.com/jstemmer/go-junit-report
+
+COPY . $TUGBOT_DIR
+RUN chmod u+x script/go_build.sh script/go_test.sh
+
+CMD ["script/go_build.sh"]
