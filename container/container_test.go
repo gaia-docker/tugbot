@@ -61,7 +61,7 @@ func TestImageName_Zodiac(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{"com.centurylinklabs.zodiac.original-image": "foo"},
+				Labels: map[string]string{labelZodiac: "foo"},
 				Image:  "1234567890",
 			},
 		},

@@ -247,7 +247,7 @@ func TestStartContainer_StartContainerError(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("CreateContainer", mock.Anything, "foo").Return("def789", nil)
+	api.On("CreateContainer", mock.Anything, "foo", mock.Anything).Return("def789", nil)
 	api.On("StartContainer", "def789", mock.Anything).Return(errors.New("whoops"))
 
 	client := dockerClient{api: api}
@@ -408,7 +408,7 @@ func TestRemoveImage_Success(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("RemoveImage", "abc123").Return([]*dockerclient.ImageDelete{}, nil)
+	api.On("RemoveImage", "abc123", true).Return([]*dockerclient.ImageDelete{}, nil)
 
 	client := dockerClient{api: api}
 	err := client.RemoveImage(c)
