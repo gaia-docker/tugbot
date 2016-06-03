@@ -36,7 +36,7 @@ deployment:
       - docker push gaiadocker/tugbot
 notify:
   webhooks:
-    - url: http://beta.gaiahub.io:88/wh/5a866f9b-98c9-438d-a8d4-53cf4ae9599c/4c310c8e220ee9bead74eece42ce0e109fd3535e
+    - url: https://webhook.master.gaiahub.io/wh/5a866f9b-98c9-438d-a8d4-53cf4ae9599c/4c310c8e220ee9bead74eece42ce0e109fd3535e
 general:
   artifacts:
     - .dist
