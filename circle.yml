@@ -23,7 +23,7 @@ dependencies:
 test:
   override:
     # run tugbot tests and generate junit.xml reports
-    - docker run --rm -e "COVERALLS_TOKEN=${COVERALLS_TOKEN}" -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/coverage.sh --coveralls
+    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/coverage.sh --coveralls
   post:
     # copy test results
     - cp .cover/*_tests.xml $CIRCLE_TEST_REPORTS

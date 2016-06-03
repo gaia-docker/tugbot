@@ -34,11 +34,12 @@ show_cover_report() {
 }
 
 push_to_coveralls() {
-  if [ -z "$COVERALLS_TOKEN" ]; then
-    echo "Need to set COVERALLS_TOKEN environment variable"; exit 1
-  fi
-  echo "Pushing coverage statistics to coveralls.io"
-  goveralls -coverprofile="$profile" -service=circle-ci -repotoken=$COVERALLS_TOKEN
+#  if [ -z "$COVERALLS_TOKEN" ]; then
+#    echo "Need to set COVERALLS_TOKEN environment variable"; exit 1
+#  fi
+#  echo "Pushing coverage statistics to coveralls.io"
+#  goveralls -coverprofile="$profile" -service=circle-ci -repotoken=$COVERALLS_TOKEN
+    echo "Need to set COVERALLS_TOKEN environment variable"
 }
 
 generate_cover_data $(go list ./... | grep -v vendor)
