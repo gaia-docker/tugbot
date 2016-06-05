@@ -9,6 +9,8 @@ import (
 
 const (
 	labelTugbot = "gaiadocker.tugbot"
+	labelTest = "tugbot.test"
+	labelRunTimestamp = "tugbot.run.timestamp"
 	labelStopSignal = "gaiadocker.tugbot.stop-signal"
 	labelZodiac = "gaiadocker.tugbot.zodiac.original-image"
 )
@@ -156,4 +158,19 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 	}
 
 	return hostConfig
+}
+
+// IsCandidateTugbot returns whether or not the current container is a candidate to run by tugbot.
+// A candidate container is identified by the presence of "tugbot.test"
+// and doesn't contain "tugbot.run.timestamp" in the container metadata.
+func (c Container) IsTugbotCandidate() bool {
+
+	ret := false
+	val, ok := c.containerInfo.Config.Labels[labelTest]
+	if ok && val == "true" {
+		val, ok = c.containerInfo.Config.Labels[labelRunTimestamp]
+		ret = !ok || len(val) == 0
+	}
+
+	return ret
 }

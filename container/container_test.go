@@ -2,7 +2,6 @@ package container
 
 import (
 	"testing"
-
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/assert"
 )
@@ -130,4 +129,51 @@ func TestStopSignal_NoLabel(t *testing.T) {
 	}
 
 	assert.Equal(t, "", c.StopSignal())
+}
+
+func TestIsTugbotCandidate_True(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{labelTest: "true"},
+			},
+		},
+	}
+
+	assert.True(t, c.IsTugbotCandidate())
+}
+
+func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{labelTest: "true", labelRunTimestamp: ""},
+			},
+		},
+	}
+
+	assert.True(t, c.IsTugbotCandidate())
+}
+
+func TestIsTugbotCandidate_FalseNoLabels(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+			},
+		},
+	}
+
+	assert.False(t, c.IsTugbotCandidate())
+}
+
+func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{labelTest: "true", labelRunTimestamp: "2016-06-05 16:48:01.9042582 +0300 IDT"},
+			},
+		},
+	}
+
+	assert.False(t, c.IsTugbotCandidate())
 }
