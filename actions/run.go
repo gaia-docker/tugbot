@@ -28,7 +28,7 @@ func Run(client container.Client, names []string) error {
 func containerFilter(names []string) container.Filter {
 
 	return func(c container.Container) bool {
-		return nameFilter(c) && c.IsTugbotCandidate()
+		return nameFilter(names)(c) && c.IsTugbotCandidate()
 	}
 }
 
