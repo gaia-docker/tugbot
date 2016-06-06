@@ -123,7 +123,7 @@ func TestStopContainer_CustomSignalSuccess(t *testing.T) {
 			Name: "foo",
 			Id:   "abc123",
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelStopSignal: "SIGUSR1"}},
+				Labels: map[string]string{LabelStopSignal: "SIGUSR1"}},
 		},
 	}
 

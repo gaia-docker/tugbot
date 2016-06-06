@@ -8,17 +8,17 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"syscall"
 	"sync"
+	"syscall"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/gaia-docker/tugbot/container"
 	"github.com/gaia-docker/tugbot/actions"
+	"github.com/gaia-docker/tugbot/container"
 )
 
 var (
-	wg sync.WaitGroup
+	wg     sync.WaitGroup
 	client container.Client
 )
 

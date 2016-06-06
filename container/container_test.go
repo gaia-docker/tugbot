@@ -60,7 +60,7 @@ func TestImageName_Zodiac(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelZodiac: "foo"},
+				Labels: map[string]string{LabelZodiac: "foo"},
 				Image:  "1234567890",
 			},
 		},
@@ -73,7 +73,7 @@ func TestIsTugbot_True(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelTugbot: "true"},
+				Labels: map[string]string{LabelTugbot: "true"},
 			},
 		},
 	}
@@ -85,7 +85,7 @@ func TestIsTugbot_WrongLabelValue(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelTugbot: "false"},
+				Labels: map[string]string{LabelTugbot: "false"},
 			},
 		},
 	}
@@ -110,7 +110,7 @@ func TestStopSignal_Present(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
 				Labels: map[string]string{
-					labelStopSignal: "SIGQUIT",
+					LabelStopSignal: "SIGQUIT",
 				},
 			},
 		},
@@ -135,7 +135,7 @@ func TestIsTugbotCandidate_True(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelTest: "true"},
+				Labels: map[string]string{LabelTest: "true"},
 			},
 		},
 	}
@@ -147,7 +147,7 @@ func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelTest: "true", labelRunTimestamp: ""},
+				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: ""},
 			},
 		},
 	}
@@ -170,7 +170,7 @@ func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{labelTest: "true", labelRunTimestamp: "2016-06-05 16:48:01.9042582 +0300 IDT"},
+				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: "2016-06-05 16:48:01.9042582 +0300 IDT"},
 			},
 		},
 	}

@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	labelTugbot = "gaiadocker.tugbot"
-	labelTest = "tugbot.test"
-	labelRunTimestamp = "tugbot.run.timestamp"
-	labelStopSignal = "gaiadocker.tugbot.stop-signal"
-	labelZodiac = "gaiadocker.tugbot.zodiac.original-image"
+	LabelTugbot = "gaiadocker.tugbot"
+	LabelTest = "tugbot.test"
+	LabelRunTimestamp = "tugbot.run.timestamp"
+	LabelStopSignal = "gaiadocker.tugbot.stop-signal"
+	LabelZodiac = "gaiadocker.tugbot.zodiac.original-image"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -53,7 +53,7 @@ func (c Container) ImageID() string {
 // "latest" tag is assumed.
 func (c Container) ImageName() string {
 	// Compatibility w/ Zodiac deployments
-	imageName, ok := c.containerInfo.Config.Labels[labelZodiac]
+	imageName, ok := c.containerInfo.Config.Labels[LabelZodiac]
 	if !ok {
 		imageName = c.containerInfo.Config.Image
 	}
@@ -84,7 +84,7 @@ func (c Container) Links() []string {
 // The tugbot container is identified by the presence of the "gaiadocker.tugbot" label in
 // the container metadata.
 func (c Container) IsTugbot() bool {
-	val, ok := c.containerInfo.Config.Labels[labelTugbot]
+	val, ok := c.containerInfo.Config.Labels[LabelTugbot]
 	return ok && val == "true"
 }
 
@@ -92,7 +92,7 @@ func (c Container) IsTugbot() bool {
 // container's metadata. If the container has not specified a custom stop
 // signal, the empty string "" is returned.
 func (c Container) StopSignal() string {
-	if val, ok := c.containerInfo.Config.Labels[labelStopSignal]; ok {
+	if val, ok := c.containerInfo.Config.Labels[LabelStopSignal]; ok {
 		return val
 	}
 
@@ -166,9 +166,9 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 func (c Container) IsTugbotCandidate() bool {
 
 	ret := false
-	val, ok := c.containerInfo.Config.Labels[labelTest]
+	val, ok := c.containerInfo.Config.Labels[LabelTest]
 	if ok && val == "true" {
-		val, ok = c.containerInfo.Config.Labels[labelRunTimestamp]
+		val, ok = c.containerInfo.Config.Labels[LabelRunTimestamp]
 		ret = !ok || len(val) == 0
 	}
 

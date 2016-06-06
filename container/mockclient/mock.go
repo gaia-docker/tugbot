@@ -3,8 +3,8 @@ package mockclient
 import (
 	"time"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/gaia-docker/tugbot/container"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockClient struct {

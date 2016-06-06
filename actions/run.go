@@ -12,14 +12,13 @@ import (
 func Run(client container.Client, names []string) error {
 
 	log.Info("Checking tests' containers")
-
-	containers, err := client.ListContainers(containerFilter(names))
+	candidates, err := client.ListContainers(containerFilter(names))
 	if err != nil {
 		return err
 	}
 
-	for _, c := range containers {
-		log.Debug(c.Name())
+	for _, c := range candidates {
+		log.Info(c.Name())
 	}
 
 	return nil
