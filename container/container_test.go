@@ -4,7 +4,10 @@ import (
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
+
+var stateExited = &dockerclient.State{Running: false, Dead: false, StartedAt: time.Now()}
 
 func TestID(t *testing.T) {
 	c := Container{
@@ -134,6 +137,7 @@ func TestStopSignal_NoLabel(t *testing.T) {
 func TestIsTugbotCandidate_True(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
 				Labels: map[string]string{LabelTest: "true"},
 			},
@@ -146,6 +150,7 @@ func TestIsTugbotCandidate_True(t *testing.T) {
 func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
 				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: ""},
 			},
@@ -155,9 +160,23 @@ func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 	assert.True(t, c.IsTugbotCandidate())
 }
 
+func TestIsTugbotCandidate_FalseRunningState(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			State: &dockerclient.State{Running: true, Dead: false, StartedAt: time.Now()},
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{LabelTest: "true"},
+			},
+		},
+	}
+
+	assert.False(t, c.IsTugbotCandidate())
+}
+
 func TestIsTugbotCandidate_FalseNoLabels(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
+			State:  stateExited,
 			Config: &dockerclient.ContainerConfig{},
 		},
 	}
@@ -168,6 +187,7 @@ func TestIsTugbotCandidate_FalseNoLabels(t *testing.T) {
 func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
 				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: "2016-06-05 16:48:01.9042582 +0300 IDT"},
 			},

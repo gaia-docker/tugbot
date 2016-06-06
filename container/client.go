@@ -53,22 +53,24 @@ type dockerClient struct {
 func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 	cs := []Container{}
 
-	log.Debug("Retrieving running containers")
+	log.Debug("Retrieving containers")
 
-	runningContainers, err := client.api.ListContainers(false, false, "")
+	containers, err := client.api.ListContainers(true, false, "")
 	if err != nil {
 		return nil, err
 	}
 
-	for _, runningContainer := range runningContainers {
-		containerInfo, err := client.api.InspectContainer(runningContainer.Id)
+	for _, currContainer := range containers {
+		containerInfo, err := client.api.InspectContainer(currContainer.Id)
 		if err != nil {
-			return nil, err
+			log.Errorf("Failed retriving container info (%s). Error: %+v", currContainer.Id, err)
+			continue
 		}
 
 		imageInfo, err := client.api.InspectImage(containerInfo.Image)
 		if err != nil {
-			return nil, err
+			log.Errorf("Failed retriving image info (%s). Error: %+v", containerInfo.Image, err)
+			continue
 		}
 
 		c := Container{containerInfo: containerInfo, imageInfo: imageInfo}

@@ -162,15 +162,16 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 }
 
 // IsTugbotCandidate returns whether or not the current container is a candidate to run by tugbot.
-// A candidate container is identified by the presence of "tugbot.test"
-// and doesn't contain "tugbot.run.timestamp" in the container metadata.
+// A candidate container is identified by the presence of "tugbot.test",
+// it doesn't contain "tugbot.run.timestamp" in the container metadata and it state is "Exited".
 func (c Container) IsTugbotCandidate() bool {
-
 	ret := false
 	val, ok := c.containerInfo.Config.Labels[LabelTest]
 	if ok && val == "true" {
 		val, ok = c.containerInfo.Config.Labels[LabelRunTimestamp]
-		ret = !ok || len(val) == 0
+		if !ok || len(val) == 0 {
+			ret = c.containerInfo.State.StateString() == "exited"
+		}
 	}
 
 	return ret

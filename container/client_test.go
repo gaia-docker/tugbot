@@ -18,7 +18,7 @@ func TestListContainers_Success(t *testing.T) {
 	ci := &dockerclient.ContainerInfo{Image: "abc123", Config: &dockerclient.ContainerConfig{Image: "img"}}
 	ii := &dockerclient.ImageInfo{}
 	api := mockclient.NewMockClient()
-	api.On("ListContainers", false, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
+	api.On("ListContainers", true, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
 	api.On("InspectContainer", "foo").Return(ci, nil)
 	api.On("InspectImage", "abc123").Return(ii, nil)
 
@@ -36,7 +36,7 @@ func TestListContainers_Filter(t *testing.T) {
 	ci := &dockerclient.ContainerInfo{Image: "abc123", Config: &dockerclient.ContainerConfig{Image: "img"}}
 	ii := &dockerclient.ImageInfo{}
 	api := mockclient.NewMockClient()
-	api.On("ListContainers", false, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
+	api.On("ListContainers", true, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
 	api.On("InspectContainer", "foo").Return(ci, nil)
 	api.On("InspectImage", "abc123").Return(ii, nil)
 
@@ -50,7 +50,7 @@ func TestListContainers_Filter(t *testing.T) {
 
 func TestListContainers_ListError(t *testing.T) {
 	api := mockclient.NewMockClient()
-	api.On("ListContainers", false, false, "").Return([]dockerclient.Container{}, errors.New("oops"))
+	api.On("ListContainers", true, false, "").Return([]dockerclient.Container{}, errors.New("oops"))
 
 	client := dockerClient{api: api}
 	_, err := client.ListContainers(allContainers)
@@ -62,14 +62,14 @@ func TestListContainers_ListError(t *testing.T) {
 
 func TestListContainers_InspectContainerError(t *testing.T) {
 	api := mockclient.NewMockClient()
-	api.On("ListContainers", false, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
+	api.On("ListContainers", true, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
 	api.On("InspectContainer", "foo").Return(&dockerclient.ContainerInfo{}, errors.New("uh-oh"))
 
 	client := dockerClient{api: api}
-	_, err := client.ListContainers(allContainers)
+	cs, err := client.ListContainers(allContainers)
 
-	assert.Error(t, err)
-	assert.EqualError(t, err, "uh-oh")
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(cs))
 	api.AssertExpectations(t)
 }
 
@@ -77,15 +77,15 @@ func TestListContainers_InspectImageError(t *testing.T) {
 	ci := &dockerclient.ContainerInfo{Image: "abc123", Config: &dockerclient.ContainerConfig{Image: "img"}}
 	ii := &dockerclient.ImageInfo{}
 	api := mockclient.NewMockClient()
-	api.On("ListContainers", false, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
+	api.On("ListContainers", true, false, "").Return([]dockerclient.Container{{Id: "foo", Names: []string{"bar"}}}, nil)
 	api.On("InspectContainer", "foo").Return(ci, nil)
 	api.On("InspectImage", "abc123").Return(ii, errors.New("whoops"))
 
 	client := dockerClient{api: api}
-	_, err := client.ListContainers(allContainers)
+	cs, err := client.ListContainers(allContainers)
 
-	assert.Error(t, err)
-	assert.EqualError(t, err, "whoops")
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(cs))
 	api.AssertExpectations(t)
 }
 

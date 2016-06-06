@@ -6,7 +6,10 @@ import (
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/mock"
 	"testing"
+	"time"
 )
+
+var stateExited = &dockerclient.State{Running: false, Dead: false, StartedAt: time.Now()}
 
 func TestRun(t *testing.T) {
 
@@ -17,6 +20,7 @@ func TestRun(t *testing.T) {
 		&dockerclient.ContainerInfo{
 			Name:   "c1",
 			Config: cc1,
+			State:  stateExited,
 		},
 		nil,
 	)
@@ -27,6 +31,7 @@ func TestRun(t *testing.T) {
 		&dockerclient.ContainerInfo{
 			Name:   "c2",
 			Config: cc2,
+			State:  stateExited,
 		},
 		nil,
 	)
@@ -34,6 +39,7 @@ func TestRun(t *testing.T) {
 		&dockerclient.ContainerInfo{
 			Name:   "c3",
 			Config: &dockerclient.ContainerConfig{},
+			State:  stateExited,
 		},
 		nil,
 	)
@@ -44,6 +50,7 @@ func TestRun(t *testing.T) {
 		&dockerclient.ContainerInfo{
 			Name:   "c4",
 			Config: cc4,
+			State:  stateExited,
 		},
 		nil,
 	)

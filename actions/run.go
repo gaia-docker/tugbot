@@ -10,13 +10,10 @@ import (
 // For each test container it'll create and start a new container according
 // to tugbots' labels.
 func Run(client container.Client, names []string) error {
-
-	log.Info("Checking tests' containers")
 	candidates, err := client.ListContainers(containerFilter(names))
 	if err != nil {
 		return err
 	}
-
 	for _, c := range candidates {
 		log.Info(c.Name())
 	}
