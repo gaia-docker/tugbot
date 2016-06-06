@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Testing use only
 type MockClient struct {
 	mock.Mock
 }
