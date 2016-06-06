@@ -37,8 +37,18 @@ func TestRun(t *testing.T) {
 		},
 		nil,
 	)
+	cc4 := &dockerclient.ContainerConfig{
+		Labels: map[string]string{container.LabelTugbot: "true"},
+	}
+	c4 := *container.NewContainer(
+		&dockerclient.ContainerInfo{
+			Name:   "c4",
+			Config: cc4,
+		},
+		nil,
+	)
 	cs := []container.Container{}
-	containers := []container.Container{c1, c2, c3}
+	containers := []container.Container{c1, c2, c3, c4}
 	client := &mockclient.MockClient{}
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Run(func(args mock.Arguments) {
