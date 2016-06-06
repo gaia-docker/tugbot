@@ -49,7 +49,7 @@ func TestRun(t *testing.T) {
 	)
 	cs := []container.Container{}
 	containers := []container.Container{c1, c2, c3, c4}
-	client := &mockclient.MockClient{}
+	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Run(func(args mock.Arguments) {
 			for _, currContainer := range containers {
