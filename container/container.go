@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	LabelTugbot = "gaiadocker.tugbot"
-	LabelTest = "tugbot.test"
+	LabelTugbot       = "gaiadocker.tugbot"
+	LabelTest         = "tugbot.test"
 	LabelRunTimestamp = "tugbot.run.timestamp"
-	LabelStopSignal = "gaiadocker.tugbot.stop-signal"
-	LabelZodiac = "gaiadocker.tugbot.zodiac.original-image"
+	LabelStopSignal   = "gaiadocker.tugbot.stop-signal"
+	LabelZodiac       = "gaiadocker.tugbot.zodiac.original-image"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -26,7 +26,7 @@ func NewContainer(containerInfo *dockerclient.ContainerInfo, imageInfo *dockercl
 
 // Container represents a running Docker container.
 type Container struct {
-	Stale         bool
+	Stale bool
 
 	containerInfo *dockerclient.ContainerInfo
 	imageInfo     *dockerclient.ImageInfo
@@ -160,7 +160,7 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 	return hostConfig
 }
 
-// IsCandidateTugbot returns whether or not the current container is a candidate to run by tugbot.
+// IsTugbotCandidate returns whether or not the current container is a candidate to run by tugbot.
 // A candidate container is identified by the presence of "tugbot.test"
 // and doesn't contain "tugbot.run.timestamp" in the container metadata.
 func (c Container) IsTugbotCandidate() bool {

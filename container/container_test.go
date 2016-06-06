@@ -1,9 +1,9 @@
 package container
 
 import (
-	"testing"
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestID(t *testing.T) {
@@ -158,8 +158,7 @@ func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 func TestIsTugbotCandidate_FalseNoLabels(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
-			Config: &dockerclient.ContainerConfig{
-			},
+			Config: &dockerclient.ContainerConfig{},
 		},
 	}
 
