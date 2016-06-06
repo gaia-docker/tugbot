@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Testing use only
+// Mock implementation of container.Client which is a wrapper for Docker API.
 type MockClient struct {
 	mock.Mock
 }

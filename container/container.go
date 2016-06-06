@@ -7,12 +7,13 @@ import (
 	"github.com/samalba/dockerclient"
 )
 
+// Docker labels from container metadata
 const (
 	LabelTugbot       = "gaiadocker.tugbot"
 	LabelTest         = "tugbot.test"
 	LabelRunTimestamp = "tugbot.run.timestamp"
-	LabelStopSignal   = "gaiadocker.tugbot.stop-signal"
-	LabelZodiac       = "gaiadocker.tugbot.zodiac.original-image"
+	LabelStopSignal   = "tugbot.stop-signal"
+	LabelZodiac       = "tugbot.zodiac.original-image"
 )
 
 // NewContainer returns a new Container instance instantiated with the
