@@ -64,21 +64,6 @@ func (c Container) ImageName() string {
 	return imageName
 }
 
-// Links returns a list containing the names of all the containers to which
-// this container is linked.
-func (c Container) Links() []string {
-	var links []string
-
-	if (c.containerInfo != nil) && (c.containerInfo.HostConfig != nil) {
-		for _, link := range c.containerInfo.HostConfig.Links {
-			name := strings.Split(link, ":")[0]
-			links = append(links, name)
-		}
-	}
-
-	return links
-}
-
 // IsTugbot returns whether or not the current container is the tugbot container itself.
 // The tugbot container is identified by the presence of the "gaiadocker.tugbot" label in
 // the container metadata.
