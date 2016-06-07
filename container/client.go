@@ -39,12 +39,11 @@ func NewClient(dockerHost string, tlsConfig *tls.Config, pullImages bool) Client
 		log.Fatalf("Error instantiating Docker client: %s", err)
 	}
 
-	return dockerClient{api: docker, pullImages: pullImages}
+	return dockerClient{api: docker}
 }
 
 type dockerClient struct {
-	api        dockerclient.Client
-	pullImages bool
+	api dockerclient.Client
 }
 
 func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
