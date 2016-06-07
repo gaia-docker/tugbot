@@ -99,9 +99,11 @@ func before(c *cli.Context) error {
 
 func start(c *cli.Context) {
 	names := c.Args()
+	wg.Add(1)
 	if err := actions.Run(client, names); err != nil {
 		fmt.Println(err)
 	}
+	wg.Done()
 }
 
 func handleSignals() {
