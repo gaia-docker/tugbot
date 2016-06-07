@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mock implementation of container.Client which is a wrapper for Docker API.
+// MockClient is mock implementation of container.Client which is a wrapper for Docker API.
 type MockClient struct {
 	mock.Mock
 }
@@ -26,7 +26,7 @@ func (m *MockClient) StopContainer(c container.Container, timeout time.Duration)
 	return args.Error(0)
 }
 
-func (m *MockClient) StartContainer(c container.Container) error {
+func (m *MockClient) StartContainerFrom(c container.Container) error {
 	args := m.Called(c)
 	return args.Error(0)
 }

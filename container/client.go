@@ -27,7 +27,7 @@ type Filter func(Container) bool
 type Client interface {
 	ListContainers(Filter) ([]Container, error)
 	StopContainer(Container, time.Duration) error
-	StartContainer(Container) error
+	StartContainerFrom(Container) error
 	RenameContainer(Container, string) error
 	IsContainerStale(Container) (bool, error)
 	RemoveImage(Container) error
@@ -111,31 +111,32 @@ func (client dockerClient) StopContainer(c Container, timeout time.Duration) err
 	return nil
 }
 
-func (client dockerClient) StartContainer(c Container) error {
+func (client dockerClient) StartContainerFrom(c Container) error {
 	config := c.runtimeConfig()
 	hostConfig := c.hostConfig()
 	name := c.Name()
+	config.Labels[LabelCreatedFrom] = name
 
-	log.Infof("Starting %s", name)
-
+	log.Debugf("Starting container from %s", name)
 	var err error
 	var newContainerID string
+	newContainerName := fmt.Sprintf("tugbot_%s_%s", name, time.Now().Format("20060102150405"))
 	if username != "" && password != "" && email != "" {
 		auth := dockerclient.AuthConfig{
 			Username: username,
 			Password: password,
 			Email:    email,
 		}
-		newContainerID, err = client.api.CreateContainer(config, name, &auth)
+		newContainerID, err = client.api.CreateContainer(config, newContainerName, &auth)
 	} else {
-		newContainerID, err = client.api.CreateContainer(config, name, nil)
+		newContainerID, err = client.api.CreateContainer(config, newContainerName, nil)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	log.Debugf("Starting container %s (%s)", name, newContainerID)
+	log.Infof("Starting container %s (%s)", newContainerName, newContainerID)
 
 	return client.api.StartContainer(newContainerID, hostConfig)
 }

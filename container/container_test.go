@@ -25,6 +25,14 @@ func TestName(t *testing.T) {
 	assert.Equal(t, "foo", c.Name())
 }
 
+func TestNameStartWithSlash(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{Name: "/foo"},
+	}
+
+	assert.Equal(t, "foo", c.Name())
+}
+
 func TestImageID(t *testing.T) {
 	c := Container{
 		imageInfo: &dockerclient.ImageInfo{
@@ -152,7 +160,7 @@ func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: ""},
+				Labels: map[string]string{LabelTest: "true", LabelCreatedFrom: ""},
 			},
 		},
 	}
@@ -189,7 +197,7 @@ func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelRunTimestamp: "2016-06-05 16:48:01.9042582 +0300 IDT"},
+				Labels: map[string]string{LabelTest: "true", LabelCreatedFrom: "2016-06-05 16:48:01.9042582 +0300 IDT"},
 			},
 		},
 	}

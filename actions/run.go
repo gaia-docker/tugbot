@@ -14,8 +14,10 @@ func Run(client container.Client, names []string) error {
 	if err != nil {
 		return err
 	}
-	for _, c := range candidates {
-		log.Info(c.Name())
+	for _, currCandidate := range candidates {
+		if err := client.StartContainerFrom(currCandidate); err != nil {
+			log.Error(err)
+		}
 	}
 
 	return nil
@@ -32,7 +34,9 @@ func nameFilter(names []string) container.Filter {
 
 	if len(names) == 0 {
 		// all containers
-		return func(container.Container) bool { return true }
+		return func(container.Container) bool {
+			return true
+		}
 	}
 
 	return func(c container.Container) bool {

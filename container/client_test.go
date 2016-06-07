@@ -2,6 +2,7 @@ package container
 
 import (
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,8 +12,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func allContainers(Container) bool { return true }
-func noContainers(Container) bool  { return false }
+func allContainers(Container) bool {
+	return true
+}
+func noContainers(Container) bool {
+	return false
+}
 
 func TestListContainers_Success(t *testing.T) {
 	ci := &dockerclient.ContainerInfo{Image: "abc123", Config: &dockerclient.ContainerConfig{Image: "img"}}
@@ -201,11 +206,18 @@ func TestStartContainer_Success(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("CreateContainer", mock.AnythingOfType("*dockerclient.ContainerConfig"), "foo", mock.AnythingOfType("*dockerclient.AuthConfig")).Return("def789", nil)
-	api.On("StartContainer", "def789", mock.AnythingOfType("*dockerclient.HostConfig")).Return(nil)
+	api.On("CreateContainer",
+		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
+			return config.Labels[LabelCreatedFrom] == "foo"
+		}),
+		mock.MatchedBy(func(name string) bool {
+			return strings.HasPrefix(name, "tugbot_foo_")
+		}),
+		mock.AnythingOfType("*dockerclient.AuthConfig")).Return("def789", nil).Once()
+	api.On("StartContainer", "def789", mock.AnythingOfType("*dockerclient.HostConfig")).Return(nil).Once()
 
 	client := dockerClient{api: api}
-	err := client.StartContainer(c)
+	err := client.StartContainerFrom(c)
 
 	assert.NoError(t, err)
 	api.AssertExpectations(t)
@@ -224,10 +236,16 @@ func TestStartContainer_CreateContainerError(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("CreateContainer", mock.Anything, "foo", mock.Anything).Return("", errors.New("oops"))
+	api.On("CreateContainer",
+		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
+			return config.Labels[LabelCreatedFrom] == "foo"
+		}),
+		mock.MatchedBy(func(name string) bool {
+			return strings.HasPrefix(name, "tugbot_foo_")
+		}), mock.AnythingOfType("*dockerclient.AuthConfig")).Return("", errors.New("oops")).Once()
 
 	client := dockerClient{api: api}
-	err := client.StartContainer(c)
+	err := client.StartContainerFrom(c)
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "oops")
@@ -247,11 +265,18 @@ func TestStartContainer_StartContainerError(t *testing.T) {
 	}
 
 	api := mockclient.NewMockClient()
-	api.On("CreateContainer", mock.Anything, "foo", mock.Anything).Return("def789", nil)
-	api.On("StartContainer", "def789", mock.Anything).Return(errors.New("whoops"))
+	api.On("CreateContainer",
+		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
+			return config.Labels[LabelCreatedFrom] == "foo"
+		}),
+		mock.MatchedBy(func(name string) bool {
+			return strings.HasPrefix(name, "tugbot_foo_")
+		}),
+		mock.AnythingOfType("*dockerclient.AuthConfig")).Return("created-container-id", nil).Once()
+	api.On("StartContainer", "created-container-id", mock.Anything).Return(errors.New("whoops")).Once()
 
 	client := dockerClient{api: api}
-	err := client.StartContainer(c)
+	err := client.StartContainerFrom(c)
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "whoops")

@@ -9,11 +9,11 @@ import (
 
 // Docker labels from container metadata
 const (
-	LabelTugbot       = "gaiadocker.tugbot"
-	LabelTest         = "tugbot.test"
-	LabelRunTimestamp = "tugbot.run.timestamp"
-	LabelStopSignal   = "tugbot.stop-signal"
-	LabelZodiac       = "tugbot.zodiac.original-image"
+	LabelTugbot      = "gaiadocker.tugbot"
+	LabelTest        = "tugbot.test"
+	LabelCreatedFrom = "tugbot.created.from"
+	LabelStopSignal  = "tugbot.stop-signal"
+	LabelZodiac      = "tugbot.zodiac.original-image"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -40,7 +40,7 @@ func (c Container) ID() string {
 
 // Name returns the Docker container name.
 func (c Container) Name() string {
-	return c.containerInfo.Name
+	return strings.TrimPrefix(c.containerInfo.Name, "/")
 }
 
 // ImageID returns the ID of the Docker image that was used to start the
@@ -163,12 +163,12 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 
 // IsTugbotCandidate returns whether or not the current container is a candidate to run by tugbot.
 // A candidate container is identified by the presence of "tugbot.test",
-// it doesn't contain "tugbot.run.timestamp" in the container metadata and it state is "Exited".
+// it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
 func (c Container) IsTugbotCandidate() bool {
 	ret := false
 	val, ok := c.containerInfo.Config.Labels[LabelTest]
 	if ok && val == "true" {
-		val, ok = c.containerInfo.Config.Labels[LabelRunTimestamp]
+		val, ok = c.containerInfo.Config.Labels[LabelCreatedFrom]
 		if !ok || len(val) == 0 {
 			ret = c.containerInfo.State.StateString() == "exited"
 		}
