@@ -28,9 +28,6 @@ type Client interface {
 	ListContainers(Filter) ([]Container, error)
 	StopContainer(Container, time.Duration) error
 	StartContainerFrom(Container) error
-	RenameContainer(Container, string) error
-	IsContainerStale(Container) (bool, error)
-	RemoveImage(Container) error
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -139,54 +136,6 @@ func (client dockerClient) StartContainerFrom(c Container) error {
 	log.Infof("Starting container %s (%s)", newContainerName, newContainerID)
 
 	return client.api.StartContainer(newContainerID, hostConfig)
-}
-
-func (client dockerClient) RenameContainer(c Container, newName string) error {
-	log.Debugf("Renaming container %s (%s) to %s", c.Name(), c.ID(), newName)
-	return client.api.RenameContainer(c.ID(), newName)
-}
-
-func (client dockerClient) IsContainerStale(c Container) (bool, error) {
-	oldImageInfo := c.imageInfo
-	imageName := c.ImageName()
-
-	if client.pullImages {
-		log.Debugf("Pulling %s for %s", imageName, c.Name())
-
-		if username != "" && password != "" && email != "" {
-			auth := dockerclient.AuthConfig{
-				Username: username,
-				Password: password,
-				Email:    email,
-			}
-			if err := client.api.PullImage(imageName, &auth); err != nil {
-				return false, err
-			}
-		} else {
-			if err := client.api.PullImage(imageName, nil); err != nil {
-				return false, err
-			}
-		}
-	}
-
-	newImageInfo, err := client.api.InspectImage(imageName)
-	if err != nil {
-		return false, err
-	}
-
-	if newImageInfo.Id != oldImageInfo.Id {
-		log.Infof("Found new %s image (%s)", imageName, newImageInfo.Id)
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func (client dockerClient) RemoveImage(c Container) error {
-	imageID := c.ImageID()
-	log.Infof("Removing image %s", imageID)
-	_, err := client.api.RemoveImage(imageID, true)
-	return err
 }
 
 func (client dockerClient) waitForStop(c Container, waitTime time.Duration) error {

@@ -27,8 +27,6 @@ func NewContainer(containerInfo *dockerclient.ContainerInfo, imageInfo *dockercl
 
 // Container represents a running Docker container.
 type Container struct {
-	Stale bool
-
 	containerInfo *dockerclient.ContainerInfo
 	imageInfo     *dockerclient.ImageInfo
 }
