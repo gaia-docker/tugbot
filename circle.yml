@@ -4,6 +4,9 @@ machine:
     - sudo chmod 0755 /usr/bin/docker
   services:
     - docker
+  environment:
+    IMAGE_NAME: gaiadocker/tugbot
+    BUILDER_IMAGE_NAME: gaiadocker/tugbot-builder
 checkout:
   post:
     - git fetch --unshallow || true
@@ -13,17 +16,17 @@ dependencies:
   override:
     - chmod u+x script/go_build.sh script/coverage.sh
     # create builder image
-    - docker build -t gaiadocker/tugbot-builder -f Dockerfile.build .
+    - docker build -t $BUILDER_IMAGE_NAME -f Dockerfile.build .
     # run go build in a docker container
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/go_build.sh
+    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/go_build.sh
     # create tugbot docker image
-    - docker build -t gaiadocker/tugbot .
-    - docker tag gaiadocker/tugbot gaiadocker/tugbot:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
-    - docker tag gaiadocker/tugbot gaiadocker/tugbot:$CIRCLE_BRANCH
+    - docker build -t $IMAGE_NAME .
+    - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
+    - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BRANCH
 test:
   override:
     # run tugbot tests and generate junit.xml reports
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot gaiadocker/tugbot-builder script/coverage.sh
+    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/coverage.sh
   post:
     # copy test results
     - cp .cover/*_tests.xml $CIRCLE_TEST_REPORTS
@@ -34,7 +37,7 @@ deployment:
     commands:
       # deply image to DockerHub
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push gaiadocker/tugbot
+      - docker push $IMAGE_NAME
 notify:
   webhooks:
     - url: https://webhook.master.gaiahub.io/wh/5a866f9b-98c9-438d-a8d4-53cf4ae9599c/4c310c8e220ee9bead74eece42ce0e109fd3535e
