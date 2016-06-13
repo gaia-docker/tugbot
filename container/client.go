@@ -28,7 +28,7 @@ type Client interface {
 	ListContainers(Filter) ([]Container, error)
 	StopContainer(Container, time.Duration) error
 	StartContainerFrom(Container) error
-	StartMonitorEvents(cb dockerclient.Callback)
+	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
 }
 
@@ -59,21 +59,12 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 	}
 
 	for _, currContainer := range containers {
-		containerInfo, err := client.api.InspectContainer(currContainer.Id)
+		c, err := client.toContainer(currContainer.Id)
 		if err != nil {
-			log.Errorf("Failed retriving container info (%s). Error: %+v", currContainer.Id, err)
 			continue
 		}
-
-		imageInfo, err := client.api.InspectImage(containerInfo.Image)
-		if err != nil {
-			log.Errorf("Failed retriving image info (%s). Error: %+v", containerInfo.Image, err)
-			continue
-		}
-
-		c := Container{containerInfo: containerInfo, imageInfo: imageInfo}
-		if fn(c) {
-			cs = append(cs, c)
+		if fn(*c) {
+			cs = append(cs, *c)
 		}
 	}
 
@@ -145,6 +136,22 @@ func (client dockerClient) StartMonitorEvents(cb dockerclient.Callback) {
 
 func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
+}
+
+func (client dockerClient) toContainer(containerId string) (*Container, error) {
+	containerInfo, err := client.api.InspectContainer(containerId)
+	if err != nil {
+		log.Errorf("Failed retriving container info (%s). Error: %+v", containerId, err)
+		return nil, err
+	}
+
+	imageInfo, err := client.api.InspectImage(containerInfo.Image)
+	if err != nil {
+		log.Errorf("Failed retriving image info (%s). Error: %+v", containerInfo.Image, err)
+		return nil, err
+	}
+
+	return &Container{containerInfo: containerInfo, imageInfo: imageInfo}, nil
 }
 
 func (client dockerClient) waitForStop(c Container, waitTime time.Duration) error {
