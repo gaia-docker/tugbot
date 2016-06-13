@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gaia-docker/tugbot/container"
+	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -29,4 +30,12 @@ func (m *MockClient) StopContainer(c container.Container, timeout time.Duration)
 func (m *MockClient) StartContainerFrom(c container.Container) error {
 	args := m.Called(c)
 	return args.Error(0)
+}
+
+func (m *MockClient) StartMonitorEvents(cb dockerclient.Callback) {
+	m.Called(cb)
+}
+
+func (m *MockClient) StopAllMonitorEvents() {
+	m.Called()
 }

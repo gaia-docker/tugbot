@@ -28,6 +28,8 @@ type Client interface {
 	ListContainers(Filter) ([]Container, error)
 	StopContainer(Container, time.Duration) error
 	StartContainerFrom(Container) error
+	StartMonitorEvents(cb dockerclient.Callback)
+	StopAllMonitorEvents()
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -135,6 +137,14 @@ func (client dockerClient) StartContainerFrom(c Container) error {
 	log.Infof("Starting container %s (%s)", newContainerName, newContainerID)
 
 	return client.api.StartContainer(newContainerID, hostConfig)
+}
+
+func (client dockerClient) StartMonitorEvents(cb dockerclient.Callback) {
+	client.api.StartMonitorEvents(cb, nil)
+}
+
+func (client dockerClient) StopAllMonitorEvents() {
+	client.api.StopAllMonitorEvents()
 }
 
 func (client dockerClient) waitForStop(c Container, waitTime time.Duration) error {
