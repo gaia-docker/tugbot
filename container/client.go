@@ -30,7 +30,7 @@ type Client interface {
 	StartContainerFrom(Container) error
 	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
-	IsCreatedByTugbot(string) (bool, error)
+	IsCreatedByTugbot(*dockerclient.Event) (bool, error)
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -139,8 +139,8 @@ func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
 }
 
-func (client dockerClient) IsCreatedByTugbot(containerId string) (bool, error) {
-	c, err := client.toContainer(containerId)
+func (client dockerClient) IsCreatedByTugbot(e *dockerclient.Event) (bool, error) {
+	c, err := client.toContainer(e.ID)
 	if err != nil {
 		return true, err
 	}

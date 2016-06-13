@@ -40,7 +40,7 @@ func (m *MockClient) StopAllMonitorEvents() {
 	m.Called()
 }
 
-func (m *MockClient) IsCreatedByTugbot(containerId string) (bool, error) {
-	args := m.Called(containerId)
+func (m *MockClient) IsCreatedByTugbot(e *dockerclient.Event) (bool, error) {
+	args := m.Called(e)
 	return args.Get(0).(bool), args.Error(1)
 }

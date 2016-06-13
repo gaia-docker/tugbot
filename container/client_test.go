@@ -297,7 +297,7 @@ func TestClientIsCreatedByTugbot_True(t *testing.T) {
 	api.On("InspectImage", "i123").Return(ii, nil)
 
 	client := dockerClient{api: api}
-	created, err := client.IsCreatedByTugbot("c123")
+	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
 
 	assert.NoError(t, err)
 	assert.True(t, created)
@@ -318,9 +318,22 @@ func TestClientIsCreatedByTugbot_False(t *testing.T) {
 	api.On("InspectImage", "i123").Return(ii, nil)
 
 	client := dockerClient{api: api}
-	created, err := client.IsCreatedByTugbot("c123")
+	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
 
 	assert.NoError(t, err)
 	assert.False(t, created)
+	api.AssertExpectations(t)
+}
+
+func TestClientIsCreatedByTugbot_ErrorInspectContainer(t *testing.T) {
+	api := mockclient.NewMockClient()
+	api.On("InspectContainer", "c123").Return(&dockerclient.ContainerInfo{}, errors.New("no container found"))
+
+	client := dockerClient{api: api}
+	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "no container found")
+	assert.True(t, created)
 	api.AssertExpectations(t)
 }
