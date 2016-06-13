@@ -100,7 +100,7 @@ func (c Container) IsTugbotCandidate() bool {
 	return ret
 }
 
-// IsTugbotCandidate returns whether or not a container created by tugbot.
+// IsCreatedByTugbot returns whether or not a container created by tugbot.
 func (c Container) IsCreatedByTugbot() bool {
 	val, ok := c.containerInfo.Config.Labels[LabelCreatedFrom]
 
