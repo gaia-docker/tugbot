@@ -39,3 +39,8 @@ func (m *MockClient) StartMonitorEvents(cb dockerclient.Callback) {
 func (m *MockClient) StopAllMonitorEvents() {
 	m.Called()
 }
+
+func (m *MockClient) IsCreatedByTugbot(containerId string) (bool, error) {
+	args := m.Called(containerId)
+	return args.Get(0).(bool), args.Error(1)
+}

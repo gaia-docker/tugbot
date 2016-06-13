@@ -230,3 +230,27 @@ func TestIsEventListener_False(t *testing.T) {
 
 	assert.False(t, c.IsEventListener(&dockerclient.Event{Status: "foo"}))
 }
+
+func TestContainerIsCreatedByTugbot_Ture(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy", LabelCreatedFrom: "aabb"},
+			},
+		},
+	}
+
+	assert.True(t, c.IsCreatedByTugbot())
+}
+
+func TestContainerIsCreatedByTugbot_False(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			State:  stateExited,
+			Config: &dockerclient.ContainerConfig{},
+		},
+	}
+
+	assert.False(t, c.IsCreatedByTugbot())
+}

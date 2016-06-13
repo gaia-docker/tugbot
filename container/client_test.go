@@ -282,3 +282,45 @@ func TestStartContainer_StartContainerError(t *testing.T) {
 	assert.EqualError(t, err, "whoops")
 	api.AssertExpectations(t)
 }
+
+func TestClientIsCreatedByTugbot_True(t *testing.T) {
+	ci := &dockerclient.ContainerInfo{
+		Name: "foo",
+		Id:   "c123",
+		Config: &dockerclient.ContainerConfig{
+			Labels: map[string]string{LabelCreatedFrom: "aabb"}},
+		Image: "i123",
+	}
+	ii := &dockerclient.ImageInfo{Id: "i123"}
+	api := mockclient.NewMockClient()
+	api.On("InspectContainer", "c123").Return(ci, nil)
+	api.On("InspectImage", "i123").Return(ii, nil)
+
+	client := dockerClient{api: api}
+	created, err := client.IsCreatedByTugbot("c123")
+
+	assert.NoError(t, err)
+	assert.True(t, created)
+	api.AssertExpectations(t)
+}
+
+func TestClientIsCreatedByTugbot_False(t *testing.T) {
+	ci := &dockerclient.ContainerInfo{
+		Name: "foo",
+		Id:   "c123",
+		Config: &dockerclient.ContainerConfig{
+			Labels: map[string]string{LabelTest: "true"}},
+		Image: "i123",
+	}
+	ii := &dockerclient.ImageInfo{Id: "i123"}
+	api := mockclient.NewMockClient()
+	api.On("InspectContainer", "c123").Return(ci, nil)
+	api.On("InspectImage", "i123").Return(ii, nil)
+
+	client := dockerClient{api: api}
+	created, err := client.IsCreatedByTugbot("c123")
+
+	assert.NoError(t, err)
+	assert.False(t, created)
+	api.AssertExpectations(t)
+}

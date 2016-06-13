@@ -92,13 +92,19 @@ func (c Container) IsTugbotCandidate() bool {
 	ret := false
 	val, ok := c.containerInfo.Config.Labels[LabelTest]
 	if ok && val == "true" {
-		val, ok = c.containerInfo.Config.Labels[LabelCreatedFrom]
-		if !ok || len(val) == 0 {
+		if !c.IsCreatedByTugbot() {
 			ret = c.containerInfo.State.StateString() == "exited"
 		}
 	}
 
 	return ret
+}
+
+// IsTugbotCandidate returns whether or not a container created by tugbot.
+func (c Container) IsCreatedByTugbot() bool {
+	val, ok := c.containerInfo.Config.Labels[LabelCreatedFrom]
+
+	return ok && val != ""
 }
 
 // IsEventListener returns whether or not a container should run when an event e is occurred.
