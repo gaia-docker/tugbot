@@ -7,10 +7,11 @@ import (
 	"github.com/samalba/dockerclient"
 )
 
-// Docker labels from container metadata
+// Docker container labels
 const (
-	LabelTugbot      = "gaiadocker.tugbot"
+	LabelTugbot      = "tugbot.service"
 	LabelTest        = "tugbot.test"
+	LabelEvents      = "tugbot.test.events"
 	LabelCreatedFrom = "tugbot.created.from"
 	LabelStopSignal  = "tugbot.stop-signal"
 	LabelZodiac      = "tugbot.zodiac.original-image"
@@ -65,10 +66,11 @@ func (c Container) ImageName() string {
 }
 
 // IsTugbot returns whether or not the current container is the tugbot container itself.
-// The tugbot container is identified by the presence of the "gaiadocker.tugbot" label in
-// the container metadata.
+// The tugbot container is identified by the presence of the "tugbot.service"
+// label in the container metadata.
 func (c Container) IsTugbot() bool {
 	val, ok := c.containerInfo.Config.Labels[LabelTugbot]
+
 	return ok && val == "true"
 }
 
@@ -81,6 +83,33 @@ func (c Container) StopSignal() string {
 	}
 
 	return ""
+}
+
+// IsTugbotCandidate returns whether or not a container is a candidate to run by tugbot.
+// A candidate container is identified by the presence of "tugbot.test",
+// it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
+func (c Container) IsTugbotCandidate() bool {
+	ret := false
+	val, ok := c.containerInfo.Config.Labels[LabelTest]
+	if ok && val == "true" {
+		val, ok = c.containerInfo.Config.Labels[LabelCreatedFrom]
+		if !ok || len(val) == 0 {
+			ret = c.containerInfo.State.StateString() == "exited"
+		}
+	}
+
+	return ret
+}
+
+// IsEventListener returns whether or not a container should run when an event e is occurred.
+func (c Container) IsEventListener(e *dockerclient.Event) bool {
+	ret := false
+	if e != nil {
+		events, ok := c.containerInfo.Config.Labels[LabelEvents]
+		ret = ok && sliceContains(e.Status, strings.Split(events, ","))
+	}
+
+	return ret
 }
 
 // Ideally, we'd just be able to take the ContainerConfig from the old container
@@ -142,20 +171,4 @@ func (c Container) hostConfig() *dockerclient.HostConfig {
 	}
 
 	return hostConfig
-}
-
-// IsTugbotCandidate returns whether or not the current container is a candidate to run by tugbot.
-// A candidate container is identified by the presence of "tugbot.test",
-// it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
-func (c Container) IsTugbotCandidate() bool {
-	ret := false
-	val, ok := c.containerInfo.Config.Labels[LabelTest]
-	if ok && val == "true" {
-		val, ok = c.containerInfo.Config.Labels[LabelCreatedFrom]
-		if !ok || len(val) == 0 {
-			ret = c.containerInfo.State.StateString() == "exited"
-		}
-	}
-
-	return ret
 }

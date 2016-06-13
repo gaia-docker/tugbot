@@ -204,3 +204,29 @@ func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
 
 	assert.False(t, c.IsTugbotCandidate())
 }
+
+func TestIsEventListener_True(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy"},
+			},
+		},
+	}
+
+	assert.True(t, c.IsEventListener(&dockerclient.Event{Status: "start"}))
+}
+
+func TestIsEventListener_False(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			State: stateExited,
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy"},
+			},
+		},
+	}
+
+	assert.False(t, c.IsEventListener(&dockerclient.Event{Status: "foo"}))
+}
