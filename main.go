@@ -15,11 +15,13 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/gaia-docker/tugbot/actions"
 	"github.com/gaia-docker/tugbot/container"
+	"github.com/samalba/dockerclient"
 )
 
 var (
 	wg     sync.WaitGroup
 	client container.Client
+	names  []string
 )
 
 func init() {
@@ -93,30 +95,31 @@ func before(c *cli.Context) error {
 
 	client = container.NewClient(c.GlobalString("host"), tls, !c.GlobalBool("no-pull"))
 
-	handleSignals()
 	return nil
 }
 
 func start(c *cli.Context) {
-	names := c.Args()
+	names = c.Args()
+	client.StartMonitorEvents(eventCallback)
+	waitForInterrupt()
+}
+
+func eventCallback(e *dockerclient.Event, ec chan error, args ...interface{}) {
 	wg.Add(1)
-	if err := actions.Run(client, names); err != nil {
-		fmt.Println(err)
+	if err := actions.Run(client, names, e); err != nil {
+		log.Error(err)
 	}
 	wg.Done()
 }
 
-func handleSignals() {
-	// Graceful shut-down on SIGINT/SIGTERM
+func waitForInterrupt() {
+	// Graceful shut-down on SIGINT/SIGTERM/SIGQUIT
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-
-	go func() {
-		<-c
-		wg.Wait()
-		os.Exit(1)
-	}()
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+	<-c
+	wg.Wait()
+	client.StopAllMonitorEvents()
+	os.Exit(1)
 }
 
 // tlsConfig translates the command-line options into a tls.Config struct

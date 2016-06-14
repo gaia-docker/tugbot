@@ -3,20 +3,30 @@ package actions
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gaia-docker/tugbot/container"
+	"github.com/samalba/dockerclient"
 )
 
 // Run looks at Docker containers to see if any of the images
 // used to start those containers is a test container.
 // For each test container it'll create and start a new container according
 // to tugbots' labels.
-func Run(client container.Client, names []string) error {
-	candidates, err := client.ListContainers(containerFilter(names))
+func Run(client container.Client, names []string, e *dockerclient.Event) error {
+	isCreatedByTugbot, err := client.IsCreatedByTugbot(e)
 	if err != nil {
 		return err
 	}
-	for _, currCandidate := range candidates {
-		if err := client.StartContainerFrom(currCandidate); err != nil {
-			log.Error(err)
+
+	if !isCreatedByTugbot {
+		candidates, err := client.ListContainers(containerFilter(names))
+		if err != nil {
+			return err
+		}
+		for _, currCandidate := range candidates {
+			if currCandidate.IsEventListener(e) {
+				if err := client.StartContainerFrom(currCandidate); err != nil {
+					log.Error(err)
+				}
+			}
 		}
 	}
 
