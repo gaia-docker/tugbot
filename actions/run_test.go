@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"fmt"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/gaia-docker/tugbot/container/mockclient"
 	"github.com/samalba/dockerclient"
@@ -29,7 +30,6 @@ func TestRun_StartEvent(t *testing.T) {
 
 	client := mockclient.NewMockClient()
 	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
@@ -38,6 +38,47 @@ func TestRun_StartEvent(t *testing.T) {
 
 	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	assert.NoError(t, err)
+	client.AssertExpectations(t)
+}
+
+func TestRun_CallByEventType(t *testing.T) {
+	cc1 := &dockerclient.ContainerConfig{
+		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "create"},
+	}
+	c1 := *container.NewContainer(
+		&dockerclient.ContainerInfo{
+			Name:   "c1",
+			Config: cc1,
+			State:  stateExited,
+		},
+		nil,
+	)
+	cc2 := &dockerclient.ContainerConfig{
+		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "start"},
+	}
+	c2 := *container.NewContainer(
+		&dockerclient.ContainerInfo{
+			Name:   "c2",
+			Config: cc2,
+			State:  stateExited,
+		},
+		nil,
+	)
+
+	client := mockclient.NewMockClient()
+	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
+	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c1, c2}, nil)
+	var called []string
+	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
+		Run(func(args mock.Arguments) {
+			called = append(called, args.Get(0).(container.Container).Name())
+		}).Return(nil)
+
+	err := Run(client, []string{c2.Name()}, &dockerclient.Event{Status: "start"})
+	fmt.Println("efffi ", called)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(called))
+	assert.Equal(t, c2.Name(), called[0])
 	client.AssertExpectations(t)
 }
 
