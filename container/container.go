@@ -11,7 +11,7 @@ import (
 const (
 	LabelTugbot      = "tugbot.service"
 	LabelTest        = "tugbot.test"
-	LabelEvents      = "tugbot.test.events"
+	LabelEvents      = "tugbot.event.docker"
 	LabelCreatedFrom = "tugbot.created.from"
 	LabelStopSignal  = "tugbot.stop-signal"
 	LabelZodiac      = "tugbot.zodiac.original-image"
