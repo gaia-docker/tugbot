@@ -15,6 +15,7 @@ import (
 func allContainers(Container) bool {
 	return true
 }
+
 func noContainers(Container) bool {
 	return false
 }
@@ -193,7 +194,7 @@ func TestStopContainer_RemoveContainerError(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStartContainer_Success(t *testing.T) {
+func TestStartContainerFrom_Success(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Name:       "foo",
@@ -223,7 +224,50 @@ func TestStartContainer_Success(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStartContainer_CreateContainerError(t *testing.T) {
+func TestStartContainerFrom_SuccessUsingAuthConfig(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Name:       "foo",
+			Config:     &dockerclient.ContainerConfig{},
+			HostConfig: &dockerclient.HostConfig{},
+		},
+		imageInfo: &dockerclient.ImageInfo{
+			Config: &dockerclient.ContainerConfig{},
+		},
+	}
+
+	api := mockclient.NewMockClient()
+	originalUsername := username
+	originalPassword := password
+	originalEmail := email
+	username = "user-test"
+	password = "123456"
+	email = "user-test@hpe.com"
+	defer func() {
+		username = originalUsername
+		password = originalPassword
+		email = originalEmail
+	}()
+	api.On("CreateContainer",
+		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
+			return config.Labels[LabelCreatedFrom] == "foo"
+		}),
+		mock.MatchedBy(func(name string) bool {
+			return strings.HasPrefix(name, "tugbot_foo_")
+		}),
+		mock.MatchedBy(func(authConfig *dockerclient.AuthConfig) bool {
+			return "user-test" == authConfig.Username && "123456" == authConfig.Password && "user-test@hpe.com" == authConfig.Email
+		})).Return("def789", nil).Once()
+	api.On("StartContainer", "def789", mock.AnythingOfType("*dockerclient.HostConfig")).Return(nil).Once()
+
+	client := dockerClient{api: api}
+	err := client.StartContainerFrom(c)
+
+	assert.NoError(t, err)
+	api.AssertExpectations(t)
+}
+
+func TestStartContainerFrom_CreateContainerError(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Name:       "foo",
@@ -252,7 +296,7 @@ func TestStartContainer_CreateContainerError(t *testing.T) {
 	api.AssertExpectations(t)
 }
 
-func TestStartContainer_StartContainerError(t *testing.T) {
+func TestStartContainerFrom_StartContainerError(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Name:       "foo",
