@@ -24,6 +24,13 @@ All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflic
 - `tugbot.results` - directory, where *test container* reports test results; default to `/var/tests/results`
 - `tugbot.event.docker` - list of comma separated Docker events
 
+#####Example (Dockerfile):
+```
+LABEL tugbot.test=true
+LABEL tugbot.results=/var/tests/results
+LABEL tugbot.event.docker=start
+```
+
 ## Tugbot Run Service
 
 ```
