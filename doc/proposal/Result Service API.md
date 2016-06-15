@@ -10,9 +10,9 @@ Later on we can add webhook support for both "collect" and "Result Service" as t
 ## API Design
 
 ```
-Contect-Type: application/zip
-POST on http://result-service:8080/upload-data?exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
+Contect-Type: "application/x-gzip"
+POST on http://result-service:8080/results?mainfile=results.txt&exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
 ```
 
-We think about single zip that will contain all of the info (3 folders: "container_info", "console_output", "results").
+We think about single tar.gz that will contain all of the info (3 folders: "container_info", "console_output", "results").
 For performance and simplicity tugbot "collect" will add some essential data as query params (so Result Service won't need to unzip the input everytime it need something)
