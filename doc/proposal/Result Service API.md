@@ -19,8 +19,8 @@ Query params:
 Non of the query params are mandatory.
 * `mainfile` - the main test results file. In tugbot-result-service implementation this file will be echoed to the websocket
 * `exitcode` - test exit code
-* `starttime` - test start time
-* `endtime` - test end time
+* `start-time` - test start time
+* `end-time` - test end time
 
 We think about single tar.gz that will contain all of the info (3 folders: "container_info", "console_output", "results").
 For performance and simplicity tugbot "collect" will add some essential data as query params (so Result Service won't need to unzip the input everytime it need something)
