@@ -10,7 +10,7 @@ Later on we can add webhook support for both "collect" and "Result Service" as t
 ## API Design
 
 ```
-Contect-Type: "application/x-gzip"
+Contect-Type: "application/gzip"
 POST on http://result-service:8080/results?mainfile=results.txt&exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
 ```
 
