@@ -8,7 +8,7 @@
 
 User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. The **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
 
-> **Tugbot** is not responsible to **first** run of *test container*
+> **Tugbot** is not responsible for **first** of *test container*
 
 **Tugbot** performs **subsequent** *test container* execution(s) on specified Docker *event*(create, run, others...).
 
