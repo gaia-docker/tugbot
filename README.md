@@ -54,3 +54,4 @@ By default, **Tugbot** inspects *test container* configuration: to know when to 
 - `--debug`                Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
 * `--help`                 Show documentation about the supported flags.
 * `--version, -v`          Print `tugbot` version
+
