@@ -3,14 +3,16 @@
 [![CircleCI](https://circleci.com/gh/gaia-docker/tugbot.svg?style=shield)](https://circleci.com/gh/gaia-docker/tugbot)
 [![codecov](https://codecov.io/gh/gaia-docker/tugbot/branch/master/graph/badge.svg)](https://codecov.io/gh/gaia-docker/tugbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gaia-docker/tugbot)](https://goreportcard.com/report/github.com/gaia-docker/tugbot)
+[![Docker badge](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
 
-**Tugbot** is an Integration Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
+
+**Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
 
 User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. The **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
 
-> **Tugbot** is not responsible to **first** run of *test container*!
+> **Tugbot** is not responsible for **first** run of *test container*
 
-**Tugbot** performs **subsequent** *test container* execution(s) on specified *event*. This can be timer event (every 20 min), Docker event (create, run, others...) or other events (in the future) like package update, kernel update, configuration change, etc. **Tugbot** also collects test results, and it tries to do so also for first *test container* run too.
+**Tugbot** performs **subsequent** *test container* execution(s) on specified Docker *event*(create, run, others...).
 
 ## Test Container
 

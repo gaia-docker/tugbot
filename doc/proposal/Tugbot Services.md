@@ -20,7 +20,7 @@ The **Result Service** is a web service, that implements [Result Service API](Re
 
 ### Tugbot Packaging
 
-**Tugbot** framework consists from several services, currently two: `tagbot-watch` and `tugbot-run`. Each service is avaiable as single binary and can be deployed as a native application or as a Docker image.
+**Tugbot** framework consists from several services, currently two: `tagbot-collect` and `tugbot-run`. Each service is avaiable as single binary and can be deployed as a native application or as a Docker image.
 The Docker image for any **Tugbot** service should be based on Alpine Linux and contain single service binary. This binary should not run as a `root` user.
 
 ## Test Container
@@ -36,10 +36,10 @@ All **Tugbot** labels must be prefixed with `Tugbot.` to avoid potential conflic
 - `tugbot.event.timer` - recurrent time interval; can use time suffix ("s", "m", "h") for readability
 - `tugbot.event.docker` - list of comma separated Docker events
 
-## Tugbot Watch Service
+## Tugbot Collect Service
 
 
-`tugbot-watch` - automatically discovers all *test containers*, collects test results from "exited" *test containers* (either from mounted volume or using `docker cp` command) and uploads all test result files to specified **Result Service**; use API key
+`tugbot-collect` - automatically discovers all *test containers*, collects test results from "exited" *test containers* (either from mounted volume or using `docker cp` command) and uploads all test result files to specified **Result Service**; use API key
 
 - `--result-service, -r`  Result service URL for uploading test results.
 - `--api-key, -k`         Result service API key.
@@ -52,10 +52,10 @@ All **Tugbot** labels must be prefixed with `Tugbot.` to avoid potential conflic
 - `--tlskey`              Client key for TLS authentication. Used in conjunction with the `--tls` or `--tlsverify` flags to identify the key to use for client authentication. The value for this flag can be either the fully-qualified path to the *.pem* file containing the client key or a string containing the key itself. Defaults to "/etc/ssl/docker/key.pem".
 - `--debug`               Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
 - `--help`                Show documentation about the supported flags.
-- `--version, -v`         Print `tugbot-watch` service version.
+- `--version, -v`         Print `tugbot-collect` service version.
 
 ```
-tugbot-watch --result-service http://nga.hp.com --api-key ACSD34SSD85DF
+tugbot-collect --result-service http://nga.hp.com --api-key ACSD34SSD85DF
 ```
 
 ## Tugbot Run Service
