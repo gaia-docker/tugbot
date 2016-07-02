@@ -10,9 +10,6 @@ RUN curl -L https://github.com/Masterminds/glide/releases/download/0.10.1/glide-
 # gox - Go cross compile tool
 RUN go get -v github.com/mitchellh/gox
 
-# goveralls - Go integration for Coveralls.io
-RUN go get -v github.com/mattn/goveralls
-
 # cover - Go code coverage tool
 RUN go get -v golang.org/x/tools/cmd/cover
 
