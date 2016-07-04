@@ -378,6 +378,6 @@ func TestClientIsCreatedByTugbot_ErrorInspectContainer(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.EqualError(t, err, "no container found")
-	assert.True(t, created)
+	assert.False(t, created)
 	api.AssertExpectations(t)
 }
