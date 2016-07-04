@@ -101,6 +101,7 @@ func before(c *cli.Context) error {
 func start(c *cli.Context) {
 	names = c.Args()
 	client.StartMonitorEvents(eventCallback)
+	log.Info("Tugbot Started OK")
 	waitForInterrupt()
 }
 

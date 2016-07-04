@@ -142,7 +142,7 @@ func (client dockerClient) StopAllMonitorEvents() {
 func (client dockerClient) IsCreatedByTugbot(e *dockerclient.Event) (bool, error) {
 	c, err := client.toContainer(e.ID)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 
 	return c.IsCreatedByTugbot(), nil
