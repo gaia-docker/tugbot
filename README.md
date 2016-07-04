@@ -20,6 +20,7 @@ User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kube
 **Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot.event.*` labels).
 
 ### Tugbot labels
+
 All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflict with other labels.
 
 - `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
@@ -54,3 +55,9 @@ By default, **Tugbot** inspects *test container* configuration: to know when to 
 - `--debug`                Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
 * `--help`                 Show documentation about the supported flags.
 * `--version, -v`          Print `tugbot` version
+
+## Running Tugbot inside a Docker container
+
+```bash
+docker run -d --name tugbot --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot
+```
