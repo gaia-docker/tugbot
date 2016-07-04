@@ -147,6 +147,11 @@ func TestRun_ErrorStartContainerFrom(t *testing.T) {
 	client.AssertExpectations(t)
 }
 
+func TestRun_NetworkEvent(t *testing.T) {
+	err := Run(nil, []string{}, &dockerclient.Event{Status: "network"})
+	assert.NoError(t, err)
+}
+
 func TestFilterName_True(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
 		Labels: map[string]string{container.LabelTest: "true"},
