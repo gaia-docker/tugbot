@@ -24,13 +24,13 @@ User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kube
 All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflict with other labels.
 
 - `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
-- `tugbot.results` - directory, where *test container* reports test results; default to `/var/tests/results`
+- `tugbot.results.dir` - directory, where *test container* reports test results; default to `/var/tests/results`
 - `tugbot.event.docker` - list of comma separated Docker events
 
 #####Example (Dockerfile):
 ```
 LABEL tugbot.test=true
-LABEL tugbot.results=/var/tests/results
+LABEL tugbot.results.dir=/var/tests/results
 LABEL tugbot.event.docker=start
 ```
 
