@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/gaia-docker/tugbot/branch/master/graph/badge.svg)](https://codecov.io/gh/gaia-docker/tugbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gaia-docker/tugbot)](https://goreportcard.com/report/github.com/gaia-docker/tugbot)
 [![Docker badge](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
+[![](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest 'Get your own badge on imagelayers.io')
 
 
 **Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
