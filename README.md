@@ -9,7 +9,7 @@
 
 **Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
 
-User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. The **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
+User may use an automation tool (e.g. Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.) to deploy and run application containers. **Tugbot** does not force the user to learn a new paradigm for deployment and execution of Docker containers. 
 
 > **Tugbot** is not responsible for **first** run of *test container*
 
