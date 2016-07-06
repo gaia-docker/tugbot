@@ -12,17 +12,7 @@ import (
 // to tugbots' labels.
 func Run(client container.Client, names []string, e *dockerclient.Event) error {
 	log.Debug("Event ", e)
-	if e.ID == "" {
-		log.Debug("Not a container related event. ", e)
-		return nil
-	}
-
-	isCreatedByTugbot, err := client.IsCreatedByTugbot(e)
-	if err != nil {
-		return err
-	}
-
-	if !isCreatedByTugbot {
+	if !client.IsCreatedByTugbot(e) {
 		candidates, err := client.ListContainers(containerFilter(names))
 		if err != nil {
 			return err

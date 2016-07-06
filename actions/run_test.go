@@ -36,7 +36,7 @@ func TestRun_StartEvent(t *testing.T) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
 		}).Return(nil)
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	assert.NoError(t, err)
 	client.AssertExpectations(t)
 }
@@ -74,7 +74,7 @@ func TestRun_CallByEventType(t *testing.T) {
 			called = append(called, args.Get(0).(container.Container).Name())
 		}).Return(nil)
 
-	err := Run(client, []string{c2.Name()}, &dockerclient.Event{Status: "start", ID: "123"})
+	err := Run(client, []string{c2.Name()}, &dockerclient.Event{Status: "start"})
 	fmt.Println("efffi ", called)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(called))
@@ -86,18 +86,8 @@ func TestRun_EventCreatedByTugbot(t *testing.T) {
 	client := mockclient.NewMockClient()
 	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(true, nil)
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	assert.NoError(t, err)
-	client.AssertExpectations(t)
-}
-
-func TestRun_ImageEvent(t *testing.T) {
-	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(true, errors.New("container not found"))
-
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
-	assert.Error(t, err)
-	assert.EqualError(t, err, "container not found")
 	client.AssertExpectations(t)
 }
 
@@ -106,7 +96,7 @@ func TestRun_NoCandidates(t *testing.T) {
 	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{}, nil)
 
-	Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
+	Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	client.AssertExpectations(t)
 }
 
@@ -115,7 +105,7 @@ func TestRun_ErrorListContainers(t *testing.T) {
 	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{}, errors.New("whoops"))
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	assert.Error(t, err)
 	assert.EqualError(t, err, "whoops")
 	client.AssertExpectations(t)
@@ -142,14 +132,9 @@ func TestRun_ErrorStartContainerFrom(t *testing.T) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
 		}).Return(errors.New("whoops"))
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start", ID: "123"})
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
 	assert.NoError(t, err)
 	client.AssertExpectations(t)
-}
-
-func TestRun_NetworkEvent(t *testing.T) {
-	err := Run(nil, []string{}, &dockerclient.Event{Status: "network"})
-	assert.NoError(t, err)
 }
 
 func TestFilterName_True(t *testing.T) {
