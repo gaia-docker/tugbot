@@ -20,7 +20,7 @@ The **Result Service** is a web service, that implements [Result Service API](Re
 
 ### Tugbot Packaging
 
-**Tugbot** framework consists from several services, currently two: `tagbot-collect` and `tugbot-run`. Each service is avaiable as single binary and can be deployed as a native application or as a Docker image.
+**Tugbot** framework consists from several services, currently two: `tugbot-collect` and `tugbot-run`. Each service is avaiable as single binary and can be deployed as a native application or as a Docker image.
 The Docker image for any **Tugbot** service should be based on Alpine Linux and contain single service binary. This binary should not run as a `root` user.
 
 ## Test Container
