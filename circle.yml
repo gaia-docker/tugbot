@@ -30,6 +30,7 @@ test:
   post:
     # copy test results
     - cp .cover/*_tests.xml $CIRCLE_TEST_REPORTS
+    # deploy test coverage results to codecov
     - bash <(curl -s https://codecov.io/bash) -f .cover/cover.out
 deployment:
   continuous:
