@@ -1,14 +1,15 @@
-# Tugbot
+![tugbot logo](https://hpe-tugbot.github.io/images/Tugbot_green.png "tugbot logo")
+
 
 [![CircleCI](https://circleci.com/gh/gaia-docker/tugbot.svg?style=shield)](https://circleci.com/gh/gaia-docker/tugbot)
 [![codecov](https://codecov.io/gh/gaia-docker/tugbot/branch/master/graph/badge.svg)](https://codecov.io/gh/gaia-docker/tugbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gaia-docker/tugbot)](https://goreportcard.com/report/github.com/gaia-docker/tugbot)
-[![Docker badge](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
-
+[![Docker](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
+[![Docker Image Layers](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest 'Get your own badge on imagelayers.io')
 
 **Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
 
-User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.), s/he is using regularly to deploy and run application containers. The **Tugbot** does not force user to learn a new paradigm for deployment and execution of Docker containers. Use whatever tool you are already using!
+User may use an automation tool (e.g. Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.) to deploy and run application containers. **Tugbot** does not force the user to learn a new paradigm for deployment and execution of Docker containers. 
 
 > **Tugbot** is not responsible for **first** run of *test container*
 
@@ -20,16 +21,17 @@ User may use same automation tool (Chef, Ansible, etc) or Docker scheduler (Kube
 **Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot.event.*` labels).
 
 ### Tugbot labels
+
 All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflict with other labels.
 
 - `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
-- `tugbot.results` - directory, where *test container* reports test results; default to `/var/tests/results`
+- `tugbot.results.dir` - directory, where *test container* reports test results; default to `/var/tests/results`
 - `tugbot.event.docker` - list of comma separated Docker events
 
 #####Example (Dockerfile):
 ```
 LABEL tugbot.test=true
-LABEL tugbot.results=/var/tests/results
+LABEL tugbot.results.dir=/var/tests/results
 LABEL tugbot.event.docker=start
 ```
 
@@ -54,3 +56,9 @@ By default, **Tugbot** inspects *test container* configuration: to know when to 
 - `--debug`                Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
 * `--help`                 Show documentation about the supported flags.
 * `--version, -v`          Print `tugbot` version
+
+## Running Tugbot inside a Docker container
+
+```bash
+docker run -d --name tugbot --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot
+```

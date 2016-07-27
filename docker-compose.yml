@@ -1,0 +1,16 @@
+version: '2'
+services:
+  run:
+    image: gaiadocker/tugbot
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  collect:
+    image: gaiadocker/tugbot-collect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - result
+  result:
+    image: gaiadocker/tugbot-result-service
+    ports:
+      - "8080:8080"

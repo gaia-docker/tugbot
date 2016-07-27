@@ -328,56 +328,32 @@ func TestStartContainerFrom_StartContainerError(t *testing.T) {
 }
 
 func TestClientIsCreatedByTugbot_True(t *testing.T) {
-	ci := &dockerclient.ContainerInfo{
-		Name: "foo",
-		Id:   "c123",
-		Config: &dockerclient.ContainerConfig{
-			Labels: map[string]string{LabelCreatedFrom: "aabb"}},
-		Image: "i123",
-	}
-	ii := &dockerclient.ImageInfo{Id: "i123"}
+	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb"}
 	api := mockclient.NewMockClient()
-	api.On("InspectContainer", "c123").Return(ci, nil)
-	api.On("InspectImage", "i123").Return(ii, nil)
-
 	client := dockerClient{api: api}
-	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
+	created := client.IsCreatedByTugbot(
+		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 
-	assert.NoError(t, err)
 	assert.True(t, created)
 	api.AssertExpectations(t)
 }
 
 func TestClientIsCreatedByTugbot_False(t *testing.T) {
-	ci := &dockerclient.ContainerInfo{
-		Name: "foo",
-		Id:   "c123",
-		Config: &dockerclient.ContainerConfig{
-			Labels: map[string]string{LabelTest: "true"}},
-		Image: "i123",
-	}
-	ii := &dockerclient.ImageInfo{Id: "i123"}
+	attributes := map[string]string{LabelTest: "true"}
 	api := mockclient.NewMockClient()
-	api.On("InspectContainer", "c123").Return(ci, nil)
-	api.On("InspectImage", "i123").Return(ii, nil)
-
 	client := dockerClient{api: api}
-	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
+	created := client.IsCreatedByTugbot(
+		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 
-	assert.NoError(t, err)
 	assert.False(t, created)
 	api.AssertExpectations(t)
 }
 
-func TestClientIsCreatedByTugbot_ErrorInspectContainer(t *testing.T) {
+func TestClientIsCreatedByTugbot_NoAttributes(t *testing.T) {
 	api := mockclient.NewMockClient()
-	api.On("InspectContainer", "c123").Return(&dockerclient.ContainerInfo{}, errors.New("no container found"))
-
 	client := dockerClient{api: api}
-	created, err := client.IsCreatedByTugbot(&dockerclient.Event{ID: "c123"})
+	created := client.IsCreatedByTugbot(&dockerclient.Event{})
 
-	assert.Error(t, err)
-	assert.EqualError(t, err, "no container found")
-	assert.True(t, created)
+	assert.False(t, created)
 	api.AssertExpectations(t)
 }

@@ -37,7 +37,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "tugbot"
-	app.Usage = "Automatically update running Docker containers"
+	app.Usage = "Continuous Testing Framework for Docker"
 	app.Before = before
 	app.Action = start
 	app.Flags = []cli.Flag{
@@ -101,6 +101,7 @@ func before(c *cli.Context) error {
 func start(c *cli.Context) {
 	names = c.Args()
 	client.StartMonitorEvents(eventCallback)
+	log.Info("Tugbot Started OK")
 	waitForInterrupt()
 }
 

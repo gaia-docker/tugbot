@@ -30,7 +30,7 @@ type Client interface {
 	StartContainerFrom(Container) error
 	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
-	IsCreatedByTugbot(*dockerclient.Event) (bool, error)
+	IsCreatedByTugbot(*dockerclient.Event) bool
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -139,25 +139,25 @@ func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
 }
 
-func (client dockerClient) IsCreatedByTugbot(e *dockerclient.Event) (bool, error) {
-	c, err := client.toContainer(e.ID)
-	if err != nil {
-		return true, err
+func (client dockerClient) IsCreatedByTugbot(e *dockerclient.Event) bool {
+	ret := false
+	if "" != e.Actor.Attributes[LabelCreatedFrom] {
+		ret = true
 	}
 
-	return c.IsCreatedByTugbot(), nil
+	return ret
 }
 
 func (client dockerClient) toContainer(containerId string) (*Container, error) {
 	containerInfo, err := client.api.InspectContainer(containerId)
 	if err != nil {
-		log.Errorf("Failed retriving container info (%s). Error: %+v", containerId, err)
+		log.Errorf("Failed retrieving container info (%s). Error: %+v", containerId, err)
 		return nil, err
 	}
 
 	imageInfo, err := client.api.InspectImage(containerInfo.Image)
 	if err != nil {
-		log.Errorf("Failed retriving image info (%s). Error: %+v", containerInfo.Image, err)
+		log.Errorf("Failed retrieving image info (%s). Error: %+v", containerInfo.Image, err)
 		return nil, err
 	}
 

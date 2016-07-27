@@ -11,12 +11,8 @@ import (
 // For each test container it'll create and start a new container according
 // to tugbots' labels.
 func Run(client container.Client, names []string, e *dockerclient.Event) error {
-	isCreatedByTugbot, err := client.IsCreatedByTugbot(e)
-	if err != nil {
-		return err
-	}
-
-	if !isCreatedByTugbot {
+	log.Debug("Event ", e)
+	if !client.IsCreatedByTugbot(e) {
 		candidates, err := client.ListContainers(containerFilter(names))
 		if err != nil {
 			return err

@@ -10,17 +10,52 @@ Later on we can add webhook support for both "collect" and "Result Service" as t
 ## API Design
 
 ```
-Contect-Type: "application/gzip"
-POST on http://result-service:8080/results?mainfile=results.txt&exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
+Contect-Type: "application/gzip", "application/json"
+POST on http://result-service:8080/results?docker.imagename=gaia-integartion-tests:latest&mainfile=results.txt&exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
 ```
 
 Query params:
 
-Non of the query params are mandatory.
+None of the query params are mandatory.
+* `docker.imagename` - the docker image name of the test container
 * `mainfile` - the main test results file. In tugbot-result-service implementation this file will be echoed to the websocket
 * `exitcode` - test exit code
 * `start-time` - test start time
 * `end-time` - test end time
 
+If the content type is "application/gzip":
+
 We think about single tar.gz that will contain all of the info (3 folders: "container_info", "console_output", "results").
 For performance and simplicity tugbot "collect" will add some essential data as query params (so Result Service won't need to unzip the input everytime it need something)
+
+If the content type is "application/json":
+
+Example of body:
+```json
+{
+  "ImageName": "gaiadocker/voting-e2e:latest",
+  "ContainerId": "93ce780df3095f631d2a64f02a356d51dd287311488df84e84adc947a8f2e332",
+  "StartedAt": "2016-07-25T18:24:20.572308911Z",
+  "FinishedAt": "2016-07-25T18:24:21.549659751Z",
+  "ExitCode": 0,
+  "HostName": "390697d726f1",
+  "TestSet": {
+    "Name": "Mocha Tests",
+    "Time": 0.034,
+    "Tests": [
+      {
+        "Name": "\"before all\" hook",
+        "Status": "Failed",
+        "Time": 0,
+        "Failure": "Cannot read property 'statusCode' of undefined\nTypeError: Cannot read property 'statusCode' of undefined\n    at Request._callback (specs/e2e/voting-test.js:15:18)\n    at self.callback (node_modules/request/request.js:187:22)\n    at Request.onRequestError (node_modules/request/request.js:813:8)\n    at Socket.socketErrorListener (_http_client.js:267:9)\n    at emitErrorNT (net.js:1269:8)"
+      },
+      {
+        "Name": "\"after all\" hook",
+        "Status": "Failed",
+        "Time": 0,
+        "Failure": "Cannot read property 'statusCode' of undefined\nTypeError: Cannot read property 'statusCode' of undefined\n    at Request._callback (specs/e2e/voting-test.js:53:18)\n    at self.callback (node_modules/request/request.js:187:22)\n    at Request.onRequestError (node_modules/request/request.js:813:8)\n    at Socket.socketErrorListener (_http_client.js:267:9)\n    at emitErrorNT (net.js:1269:8)"
+      }
+    ]
+  }
+}
+```
