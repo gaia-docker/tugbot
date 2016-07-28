@@ -118,52 +118,6 @@ func (c Container) IsEventListener(e *dockerclient.Event) bool {
 	return ret
 }
 
-// Ideally, we'd just be able to take the ContainerConfig from the old container
-// and use it as the starting point for creating the new container; however,
-// the ContainerConfig that comes back from the Inspect call merges the default
-// configuration (the stuff specified in the metadata for the image itself)
-// with the overridden configuration (the stuff that you might specify as part
-// of the "docker run"). In order to avoid unintentionally overriding the
-// defaults in the new image we need to separate the override options from the
-// default options. To do this we have to compare the ContainerConfig for the
-// running container with the ContainerConfig from the image that container was
-// started from. This function returns a ContainerConfig which contains just
-// the options overridden at runtime.
-func (c Container) runtimeConfig() *dockerclient.ContainerConfig {
-	config := c.containerInfo.Config
-	imageConfig := c.imageInfo.Config
-
-	if config.WorkingDir == imageConfig.WorkingDir {
-		config.WorkingDir = ""
-	}
-
-	if config.User == imageConfig.User {
-		config.User = ""
-	}
-
-	if sliceEqual(config.Cmd, imageConfig.Cmd) {
-		config.Cmd = nil
-	}
-
-	if sliceEqual(config.Entrypoint, imageConfig.Entrypoint) {
-		config.Entrypoint = nil
-	}
-
-	config.Env = sliceSubtract(config.Env, imageConfig.Env)
-
-	config.Labels = stringMapSubtract(config.Labels, imageConfig.Labels)
-
-	config.Volumes = structMapSubtract(config.Volumes, imageConfig.Volumes)
-
-	config.ExposedPorts = structMapSubtract(config.ExposedPorts, imageConfig.ExposedPorts)
-	for p := range c.containerInfo.HostConfig.PortBindings {
-		config.ExposedPorts[p] = struct{}{}
-	}
-
-	config.Image = c.ImageName()
-	return config
-}
-
 // Any links in the HostConfig need to be re-written before they can be
 // re-submitted to the Docker create API.
 func (c Container) hostConfig() *dockerclient.HostConfig {

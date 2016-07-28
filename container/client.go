@@ -102,9 +102,12 @@ func (client dockerClient) StopContainer(c Container, timeout time.Duration) err
 }
 
 func (client dockerClient) StartContainerFrom(c Container) error {
-	config := c.runtimeConfig()
+	config := c.containerInfo.Config
 	hostConfig := c.hostConfig()
 	name := c.Name()
+	if config.Labels == nil {
+		config.Labels = make(map[string]string)
+	}
 	config.Labels[LabelCreatedFrom] = name
 
 	log.Debugf("Starting container from %s", name)
