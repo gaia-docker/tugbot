@@ -29,19 +29,4 @@ generate_cover_data() {
   grep -h -v "^mode:" "$workdir"/*.cover >>"$profile"
 }
 
-show_cover_report() {
-  go tool cover -${1}="$profile" -o "$workdir/coverage.html"
-}
-
 generate_cover_data $(go list ./... | grep -v vendor)
-
-case "$1" in
-  "")
-    ;;
-  --html)
-    show_cover_report html ;;
-  --help)
-    echo >&2 "usage: $0 --coveralls|--html"; exit 0 ;;
-  *)
-    echo >&2 "error: invalid option: $1"; exit 1 ;;
-esac
