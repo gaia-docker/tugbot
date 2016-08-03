@@ -9,6 +9,8 @@
 
 **Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
 
+**Check out the demo flow (including video) [here](https://github.com/gaia-docker/example-voting-app/blob/master/DEMO-FLOW.md)**
+
 User may use an automation tool (e.g. Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.) to deploy and run application containers. **Tugbot** does not force the user to learn a new paradigm for deployment and execution of Docker containers. 
 
 > **Tugbot** is not responsible for **first** run of *test container*
