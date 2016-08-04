@@ -1,4 +1,4 @@
-### Create a dev environment for testing tugbot on Swarm cluster
+### Creating a dev environment for testing tugbot on Swarm cluster
 
 ```cli
 # create a swarm manager virtual machine
@@ -37,3 +37,4 @@ $ docker swarm join \
       --token SWMTKN-1-0ot43sramufgw93jijoh54q4o7ghe10zgaq7ljvqus1cv24gie-bbrziyhnvbq6f7yq31j6oowa6 \
       192.168.99.100:2377
 ```
+<img src="https://raw.github.com/gaia-docker/tugbot/blob/master/doc/swarm/components.svg">
