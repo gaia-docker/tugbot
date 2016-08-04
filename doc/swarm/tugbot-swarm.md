@@ -37,4 +37,4 @@ $ docker swarm join \
       --token SWMTKN-1-0ot43sramufgw93jijoh54q4o7ghe10zgaq7ljvqus1cv24gie-bbrziyhnvbq6f7yq31j6oowa6 \
       192.168.99.100:2377
 ```
-<img src="https://github.com/gaia-docker/tugbot/blob/master/doc/swarm/components.svg">
+<img src="https://cdn.rawgit.com/gaia-docker/tugbot/master/doc/swarm/components.svg">
