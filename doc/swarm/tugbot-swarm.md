@@ -41,7 +41,7 @@ $ docker swarm join \
 # create network name my_net
 $ docker network create --driver overlay my_net
 
-# create a _testing service_ - a service that runs _test container/s_ (run tasks, each task runs a _test container_)
+# create a testing-service - a service that runs test container/s (run tasks, each task runs a test container)
 # replicas - number of tasks that will be created (each task will run a docker container)
 $ docker service create --label tugbot=true --label tugbot.docker.events=start --network my_net --replicas 2 --name testme alpine date
 ```
