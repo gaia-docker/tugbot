@@ -42,7 +42,7 @@ $ docker swarm join \
 $ docker network create --driver overlay my_net
 
 # create a _testing service_ - a service that runs _test container/s_ (run tasks, each task runs a _test container_)
-# _replicas_ - number of tasks that will be created (each task will run a docker container)
+# replicas - number of tasks that will be created (each task will run a docker container)
 $ docker service create --label tugbot=true --label tugbot.docker.events=start --network my_net --replicas 2 --name testme alpine date
 ```
 <img src="https://cdn.rawgit.com/gaia-docker/tugbot/master/doc/swarm/components.svg">
