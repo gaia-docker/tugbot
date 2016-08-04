@@ -37,6 +37,9 @@ $ eval $(docker-machine env <worker>)
 $ docker swarm join \
       --token SWMTKN-1-0ot43sramufgw93jijoh54q4o7ghe10zgaq7ljvqus1cv24gie-bbrziyhnvbq6f7yq31j6oowa6 \
       192.168.99.100:2377
+
+# note that swarm is active, tugbot will send worker's events to tugbot-leader
+$ docker info
       
 # create network name my_net
 $ docker network create --driver overlay my_net
