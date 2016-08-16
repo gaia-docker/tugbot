@@ -29,7 +29,6 @@ func TestRun_StartEvent(t *testing.T) {
 	)
 
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
@@ -66,7 +65,6 @@ func TestRun_CallByEventType(t *testing.T) {
 	)
 
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c1, c2}, nil)
 	var called []string
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
@@ -84,16 +82,17 @@ func TestRun_CallByEventType(t *testing.T) {
 
 func TestRun_EventCreatedByTugbot(t *testing.T) {
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(true, nil)
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
+	attributes := map[string]string{container.LabelTest: "true",
+		container.LabelCreatedFrom: "aabb"}
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start",
+		Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.NoError(t, err)
 	client.AssertExpectations(t)
 }
 
 func TestRun_NoCandidates(t *testing.T) {
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{}, nil)
 
 	Run(client, []string{}, &dockerclient.Event{Status: "start"})
@@ -102,7 +101,6 @@ func TestRun_NoCandidates(t *testing.T) {
 
 func TestRun_ErrorListContainers(t *testing.T) {
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{}, errors.New("whoops"))
 
 	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
@@ -125,7 +123,6 @@ func TestRun_ErrorStartContainerFrom(t *testing.T) {
 	)
 
 	client := mockclient.NewMockClient()
-	client.On("IsCreatedByTugbot", mock.AnythingOfType("*dockerclient.Event")).Return(false, nil)
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
@@ -199,4 +196,14 @@ func TestFilterContainerStateRunning_False(t *testing.T) {
 	)
 
 	assert.False(t, containerFilter([]string{})(c))
+}
+
+func TestRun_EventSwarmTask(t *testing.T) {
+	client := mockclient.NewMockClient()
+
+	attributes := map[string]string{container.LabelDockerSwarmTaskId: "123hh"}
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start",
+		Actor: dockerclient.Actor{Attributes: attributes}})
+	assert.NoError(t, err)
+	client.AssertExpectations(t)
 }

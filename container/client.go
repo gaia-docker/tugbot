@@ -30,7 +30,6 @@ type Client interface {
 	StartContainerFrom(Container) error
 	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
-	IsCreatedByTugbot(*dockerclient.Event) bool
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -140,15 +139,6 @@ func (client dockerClient) StartMonitorEvents(cb dockerclient.Callback) {
 
 func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
-}
-
-func (client dockerClient) IsCreatedByTugbot(e *dockerclient.Event) bool {
-	ret := false
-	if "" != e.Actor.Attributes[LabelCreatedFrom] {
-		ret = true
-	}
-
-	return ret
 }
 
 func (client dockerClient) toContainer(containerId string) (*Container, error) {

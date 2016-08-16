@@ -15,6 +15,8 @@ const (
 	LabelCreatedFrom = "tugbot.created.from"
 	LabelStopSignal  = "tugbot.stop-signal"
 	LabelZodiac      = "tugbot.zodiac.original-image"
+
+	LabelDockerSwarmTaskId = "com.docker.swarm.task.id"
 )
 
 // NewContainer returns a new Container instance instantiated with the

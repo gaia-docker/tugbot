@@ -326,34 +326,3 @@ func TestStartContainerFrom_StartContainerError(t *testing.T) {
 	assert.EqualError(t, err, "whoops")
 	api.AssertExpectations(t)
 }
-
-func TestClientIsCreatedByTugbot_True(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb"}
-	api := mockclient.NewMockClient()
-	client := dockerClient{api: api}
-	created := client.IsCreatedByTugbot(
-		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
-
-	assert.True(t, created)
-	api.AssertExpectations(t)
-}
-
-func TestClientIsCreatedByTugbot_False(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true"}
-	api := mockclient.NewMockClient()
-	client := dockerClient{api: api}
-	created := client.IsCreatedByTugbot(
-		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
-
-	assert.False(t, created)
-	api.AssertExpectations(t)
-}
-
-func TestClientIsCreatedByTugbot_NoAttributes(t *testing.T) {
-	api := mockclient.NewMockClient()
-	client := dockerClient{api: api}
-	created := client.IsCreatedByTugbot(&dockerclient.Event{})
-
-	assert.False(t, created)
-	api.AssertExpectations(t)
-}
