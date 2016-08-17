@@ -15,7 +15,11 @@ User may use an automation tool (e.g. Chef, Ansible, etc) or Docker scheduler (K
 
 > **Tugbot** is not responsible for **first** run of *test container*
 
-**Tugbot** performs **subsequent** *test container* execution(s) on specified Docker *event*(create, run, others...).
+**Tugbot** performs **subsequent** *test container* execution(s) on specified Docker *event* (create, run, others...).
+
+> **Tugbot** ignores Docker Swarms' tasks events
+
+**Tugbot Leader** performs **subsequent** *test service* execution(s) on specified Docker Swarm Service *event*
 
 ## Test Container
 
