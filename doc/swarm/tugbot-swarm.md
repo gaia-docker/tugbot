@@ -45,6 +45,15 @@ $ docker info
 # create network name voteapp
 $ docker network create --driver overlay voteapp
 
+# Deploy Voting App
+
+# Create services for voting app
+# Create service gaiadocker/example-voting-app-vote:${VOTE_TAG}
+
+# Create service gaiadocker/example-voting-app-result:latest
+
+# Create service gaiadocker/example-voting-app-worker:latest
+
 # create a testing-service - a service that runs test container/s (run tasks, each task runs a test container)
 # replicas - number of tasks that will be created (each task will run a docker container)
 $ docker service create --network voteapp --replicas 2 --restart-condition none --label tugbot.swarm.event=update --name testme <my-test-img> date
@@ -61,15 +70,3 @@ $ docker-machine ls
 $ docker-machine start <machine-name>
 ```
 <img src="https://cdn.rawgit.com/gaia-docker/tugbot/master/doc/swarm/components.svg">
-```
-# Steps for Example Voting App on Docker Swarm Cluster
-# Create network for voting app == voteapp ?
-# @effi - do we need to create this or use the my_net above?
-
-# Create services for voting app
-# Create service gaiadocker/example-voting-app-vote:${VOTE_TAG}
-
-# Create service gaiadocker/example-voting-app-result:latest
-
-# Create service gaiadocker/example-voting-app-worker:latest
-```
