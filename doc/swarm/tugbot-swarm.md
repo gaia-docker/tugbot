@@ -28,9 +28,10 @@ To add a manager to this swarm, run the following command:
     docker swarm join \
     --token SWMTKN-1-0ot43sramufgw93jijoh54q4o7ghe10zgaq7ljvqus1cv24gie-6i30qe437o6n81v55oupvcyyr \
 
-# create 2 nodes in cluster
+# create 1 node in cluster
 $ docker-machine create --driver virtualbox worker1
-$ docker-machine create --driver virtualbox worker2
+# optional to create a second node in cluster
+# $ docker-machine create --driver virtualbox worker2
 
 # connect nodes to swarm cluster
 $ eval $(docker-machine env <worker>)
@@ -41,12 +42,12 @@ $ docker swarm join \
 # note that swarm is active, tugbot will send worker's events to tugbot-leader
 $ docker info
       
-# create network name my_net
-$ docker network create --driver overlay my_net
+# create network name voteapp
+$ docker network create --driver overlay voteapp
 
 # create a testing-service - a service that runs test container/s (run tasks, each task runs a test container)
 # replicas - number of tasks that will be created (each task will run a docker container)
-$ docker service create --network my_net --replicas 2 --restart-condition none --label tugbot.swarm.event=update --name testme my-test-img date
+$ docker service create --network voteapp --replicas 2 --restart-condition none --label tugbot.swarm.event=update --name testme <my-test-img> date
 
 # service's tasks
 $ docker service ps testme
@@ -60,3 +61,14 @@ $ docker-machine ls
 $ docker-machine start <machine-name>
 ```
 <img src="https://cdn.rawgit.com/gaia-docker/tugbot/master/doc/swarm/components.svg">
+
+# Steps for Example Voting App on Docker Swarm Cluster
+# Create network for voting app == voteapp ?
+# @effi - do we need to create this or use the my_net above?
+
+# Create services for voting app
+# Create service gaiadocker/example-voting-app-vote:${VOTE_TAG}
+
+# Create service gaiadocker/example-voting-app-result:latest
+
+# Create service gaiadocker/example-voting-app-worker:latest
