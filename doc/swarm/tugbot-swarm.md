@@ -61,7 +61,7 @@ $ docker-machine ls
 $ docker-machine start <machine-name>
 ```
 <img src="https://cdn.rawgit.com/gaia-docker/tugbot/master/doc/swarm/components.svg">
-
+```
 # Steps for Example Voting App on Docker Swarm Cluster
 # Create network for voting app == voteapp ?
 # @effi - do we need to create this or use the my_net above?
@@ -72,3 +72,4 @@ $ docker-machine start <machine-name>
 # Create service gaiadocker/example-voting-app-result:latest
 
 # Create service gaiadocker/example-voting-app-worker:latest
+```
