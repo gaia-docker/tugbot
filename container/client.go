@@ -3,16 +3,11 @@ package container
 import (
 	"crypto/tls"
 	"fmt"
-	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/samalba/dockerclient"
 )
-
-var username = os.Getenv("REPO_USER")
-var password = os.Getenv("REPO_PASS")
-var email = os.Getenv("REPO_EMAIL")
 
 // A Filter is a prototype for a function that can be used to filter the
 // results from a call to the ListContainers() method on the Client.
@@ -79,17 +74,7 @@ func (client dockerClient) StartContainerFrom(c Container) error {
 	var err error
 	var newContainerID string
 	newContainerName := fmt.Sprintf("tugbot_%s_%s", name, time.Now().Format("20060102150405"))
-	if username != "" && password != "" && email != "" {
-		auth := dockerclient.AuthConfig{
-			Username: username,
-			Password: password,
-			Email:    email,
-		}
-		newContainerID, err = client.api.CreateContainer(config, newContainerName, &auth)
-	} else {
-		newContainerID, err = client.api.CreateContainer(config, newContainerName, nil)
-	}
-
+	newContainerID, err = client.api.CreateContainer(config, newContainerName, nil)
 	if err != nil {
 		return err
 	}
