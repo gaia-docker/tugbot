@@ -4,7 +4,4 @@ coverage:
   notify:
     webhook:
       default:
-        url: "https://webhook.boris.gaiahub.io/wh/3a44a3cd-66e6-4dd1-83e0-f6bde38fc08e/b645da493e7d4ea7c0339679e9987b788412a487"
-        threshold: null
-        brunches: null
-        only_pulls: false
+        url: "https://master.gaiahub.io:444/wh/5a866f9b-98c9-438d-a8d4-53cf4ae9599c/4936fb9b9a2799b2ee03e10003b68aaa3f155324"
