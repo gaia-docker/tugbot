@@ -3,4 +3,5 @@
 .dist
 vendor
 .idea
+.glide
 container_settings.json
