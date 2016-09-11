@@ -16,9 +16,9 @@ dependencies:
   override:
     - chmod u+x script/go_build.sh script/coverage.sh
     # create builder image
-    - docker build -t $BUILDER_IMAGE_NAME -f Dockerfile.build .
+    - docker build -t $BUILDER_IMAGE_NAME -f Build.Dockerfile .
     # run go build in a docker container
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/go_build.sh
+    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot -w /go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/go_build.sh
     # create tugbot docker image
     - docker build -t $IMAGE_NAME .
     - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
@@ -26,7 +26,7 @@ dependencies:
 test:
   override:
     # run tugbot tests and generate junit.xml reports
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/coverage.sh
+    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot -w /go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/coverage.sh
   post:
     # copy test results
     - cp .cover/*_tests.xml $CIRCLE_TEST_REPORTS
