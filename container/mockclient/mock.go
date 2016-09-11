@@ -1,8 +1,6 @@
 package mockclient
 
 import (
-	"time"
-
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/mock"
@@ -20,11 +18,6 @@ func NewMockClient() *MockClient {
 func (m *MockClient) ListContainers(cf container.Filter) ([]container.Container, error) {
 	args := m.Called(cf)
 	return args.Get(0).([]container.Container), args.Error(1)
-}
-
-func (m *MockClient) StopContainer(c container.Container, timeout time.Duration) error {
-	args := m.Called(c, timeout)
-	return args.Error(0)
 }
 
 func (m *MockClient) StartContainerFrom(c container.Container) error {

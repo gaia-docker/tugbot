@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/samalba/dockerclient"
 	"github.com/samalba/dockerclient/mockclient"
@@ -92,105 +91,6 @@ func TestListContainers_InspectImageError(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(cs))
-	api.AssertExpectations(t)
-}
-
-func TestStopContainer_DefaultSuccess(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Name:   "foo",
-			Id:     "abc123",
-			Config: &dockerclient.ContainerConfig{},
-		},
-	}
-
-	ci := &dockerclient.ContainerInfo{
-		State: &dockerclient.State{
-			Running: false,
-		},
-	}
-
-	api := mockclient.NewMockClient()
-	api.On("KillContainer", "abc123", "SIGTERM").Return(nil)
-	api.On("InspectContainer", "abc123").Return(ci, nil).Once()
-	api.On("RemoveContainer", "abc123", true, false).Return(nil)
-	api.On("InspectContainer", "abc123").Return(&dockerclient.ContainerInfo{}, errors.New("Not Found"))
-
-	client := dockerClient{api: api}
-	err := client.StopContainer(c, time.Second)
-
-	assert.NoError(t, err)
-	api.AssertExpectations(t)
-}
-
-func TestStopContainer_CustomSignalSuccess(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Name: "foo",
-			Id:   "abc123",
-			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelStopSignal: "SIGUSR1"}},
-		},
-	}
-
-	ci := &dockerclient.ContainerInfo{
-		State: &dockerclient.State{
-			Running: false,
-		},
-	}
-
-	api := mockclient.NewMockClient()
-	api.On("KillContainer", "abc123", "SIGUSR1").Return(nil)
-	api.On("InspectContainer", "abc123").Return(ci, nil).Once()
-	api.On("RemoveContainer", "abc123", true, false).Return(nil)
-	api.On("InspectContainer", "abc123").Return(&dockerclient.ContainerInfo{}, errors.New("Not Found"))
-
-	client := dockerClient{api: api}
-	err := client.StopContainer(c, time.Second)
-
-	assert.NoError(t, err)
-	api.AssertExpectations(t)
-}
-
-func TestStopContainer_KillContainerError(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Name:   "foo",
-			Id:     "abc123",
-			Config: &dockerclient.ContainerConfig{},
-		},
-	}
-
-	api := mockclient.NewMockClient()
-	api.On("KillContainer", "abc123", "SIGTERM").Return(errors.New("oops"))
-
-	client := dockerClient{api: api}
-	err := client.StopContainer(c, time.Second)
-
-	assert.Error(t, err)
-	assert.EqualError(t, err, "oops")
-	api.AssertExpectations(t)
-}
-
-func TestStopContainer_RemoveContainerError(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Name:   "foo",
-			Id:     "abc123",
-			Config: &dockerclient.ContainerConfig{},
-		},
-	}
-
-	api := mockclient.NewMockClient()
-	api.On("KillContainer", "abc123", "SIGTERM").Return(nil)
-	api.On("InspectContainer", "abc123").Return(&dockerclient.ContainerInfo{}, errors.New("dangit"))
-	api.On("RemoveContainer", "abc123", true, false).Return(errors.New("whoops"))
-
-	client := dockerClient{api: api}
-	err := client.StopContainer(c, time.Second)
-
-	assert.Error(t, err)
-	assert.EqualError(t, err, "whoops")
 	api.AssertExpectations(t)
 }
 

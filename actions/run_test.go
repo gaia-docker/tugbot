@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"fmt"
+
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/gaia-docker/tugbot/container/mockclient"
 	"github.com/samalba/dockerclient"
@@ -201,7 +202,7 @@ func TestFilterContainerStateRunning_False(t *testing.T) {
 func TestRun_EventSwarmTask(t *testing.T) {
 	client := mockclient.NewMockClient()
 
-	attributes := map[string]string{container.LabelDockerSwarmTaskId: "123hh"}
+	attributes := map[string]string{container.LabelDockerSwarmTaskID: "123hh"}
 	err := Run(client, []string{}, &dockerclient.Event{Status: "start",
 		Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.NoError(t, err)

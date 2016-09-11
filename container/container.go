@@ -14,9 +14,8 @@ const (
 	LabelEvents      = "tugbot.event.docker"
 	LabelCreatedFrom = "tugbot.created.from"
 	LabelStopSignal  = "tugbot.stop-signal"
-	LabelZodiac      = "tugbot.zodiac.original-image"
 
-	LabelDockerSwarmTaskId = "com.docker.swarm.task.id"
+	LabelDockerSwarmTaskID = "com.docker.swarm.task.id"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -54,11 +53,7 @@ func (c Container) ImageID() string {
 // container. If the original image was specified without a particular tag, the
 // "latest" tag is assumed.
 func (c Container) ImageName() string {
-	// Compatibility w/ Zodiac deployments
-	imageName, ok := c.containerInfo.Config.Labels[LabelZodiac]
-	if !ok {
-		imageName = c.containerInfo.Config.Image
-	}
+	imageName := c.containerInfo.Config.Image
 
 	if !strings.Contains(imageName, ":") {
 		imageName = fmt.Sprintf("%s:latest", imageName)

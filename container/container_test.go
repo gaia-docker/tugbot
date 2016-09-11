@@ -1,10 +1,11 @@
 package container
 
 import (
-	"github.com/samalba/dockerclient"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/samalba/dockerclient"
+	"github.com/stretchr/testify/assert"
 )
 
 var stateExited = &dockerclient.State{Running: false, Dead: false, StartedAt: time.Now()}
@@ -60,19 +61,6 @@ func TestImageName_Untagged(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
 				Image: "foo",
-			},
-		},
-	}
-
-	assert.Equal(t, "foo:latest", c.ImageName())
-}
-
-func TestImageName_Zodiac(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelZodiac: "foo"},
-				Image:  "1234567890",
 			},
 		},
 	}

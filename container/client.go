@@ -10,10 +10,6 @@ import (
 	"github.com/samalba/dockerclient"
 )
 
-const (
-	defaultStopSignal = "SIGTERM"
-)
-
 var username = os.Getenv("REPO_USER")
 var password = os.Getenv("REPO_PASS")
 var email = os.Getenv("REPO_EMAIL")
@@ -26,7 +22,6 @@ type Filter func(Container) bool
 // Docker API.
 type Client interface {
 	ListContainers(Filter) ([]Container, error)
-	StopContainer(Container, time.Duration) error
 	StartContainerFrom(Container) error
 	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
@@ -71,35 +66,6 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 	return cs, nil
 }
 
-func (client dockerClient) StopContainer(c Container, timeout time.Duration) error {
-	signal := c.StopSignal()
-	if signal == "" {
-		signal = defaultStopSignal
-	}
-
-	log.Infof("Stopping %s (%s) with %s", c.Name(), c.ID(), signal)
-
-	if err := client.api.KillContainer(c.ID(), signal); err != nil {
-		return err
-	}
-
-	// Wait for container to exit, but proceed anyway after the timeout elapses
-	client.waitForStop(c, timeout)
-
-	log.Debugf("Removing container %s", c.ID())
-
-	if err := client.api.RemoveContainer(c.ID(), true, false); err != nil {
-		return err
-	}
-
-	// Wait for container to be removed. In this case an error is a good thing
-	if err := client.waitForStop(c, timeout); err == nil {
-		return fmt.Errorf("Container %s (%s) could not be removed", c.Name(), c.ID())
-	}
-
-	return nil
-}
-
 func (client dockerClient) StartContainerFrom(c Container) error {
 	config := c.containerInfo.Config
 	hostConfig := c.hostConfig()
@@ -141,10 +107,10 @@ func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
 }
 
-func (client dockerClient) toContainer(containerId string) (*Container, error) {
-	containerInfo, err := client.api.InspectContainer(containerId)
+func (client dockerClient) toContainer(containerID string) (*Container, error) {
+	containerInfo, err := client.api.InspectContainer(containerID)
 	if err != nil {
-		log.Errorf("Failed retrieving container info (%s). Error: %+v", containerId, err)
+		log.Errorf("Failed retrieving container info (%s). Error: %+v", containerID, err)
 		return nil, err
 	}
 
@@ -155,23 +121,4 @@ func (client dockerClient) toContainer(containerId string) (*Container, error) {
 	}
 
 	return &Container{containerInfo: containerInfo, imageInfo: imageInfo}, nil
-}
-
-func (client dockerClient) waitForStop(c Container, waitTime time.Duration) error {
-	timeout := time.After(waitTime)
-
-	for {
-		select {
-		case <-timeout:
-			return nil
-		default:
-			if ci, err := client.api.InspectContainer(c.ID()); err != nil {
-				return err
-			} else if !ci.State.Running {
-				return nil
-			}
-		}
-
-		time.Sleep(1 * time.Second)
-	}
 }

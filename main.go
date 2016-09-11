@@ -24,6 +24,11 @@ var (
 	names  []string
 )
 
+const (
+	// Release version
+	Release = "v0.2.0"
+)
+
 func init() {
 	log.SetLevel(log.InfoLevel)
 }
@@ -36,8 +41,10 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "tugbot"
-	app.Usage = "Continuous Testing Framework for Docker"
+	app.Name = "Tugbot"
+	app.Version = Release
+	app.Usage = "Tugbot is a continuous testing framework for Docker based environments. Tugbot monitors changes in a runtime environment (host, os, container), runs tests (packaged into Test Containers), when event occured and collects test results."
+	app.ArgsUsage = "test containers: name, list of names, or none (for all test containers)"
 	app.Before = before
 	app.Action = start
 	app.Flags = []cli.Flag{
@@ -116,7 +123,7 @@ func eventCallback(e *dockerclient.Event, ec chan error, args ...interface{}) {
 func waitForInterrupt() {
 	// Graceful shut-down on SIGINT/SIGTERM/SIGQUIT
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 	<-c
 	wg.Wait()
 	client.StopAllMonitorEvents()

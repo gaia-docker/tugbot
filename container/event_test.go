@@ -26,7 +26,7 @@ func TestIsCreatedByTugbot_NoAttributes(t *testing.T) {
 }
 
 func TestIsSwarmTask_True(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb", LabelDockerSwarmTaskId: "a123b"}
+	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb", LabelDockerSwarmTaskID: "a123b"}
 	created := IsSwarmTask(
 		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.True(t, created)
