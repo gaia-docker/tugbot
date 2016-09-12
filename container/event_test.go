@@ -1,20 +1,21 @@
 package container
 
 import (
+	"testing"
+
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestIsCreatedByTugbot_True(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb"}
+	attributes := map[string]string{TugbotTest: "true", TugbotCreatedFrom: "aabb"}
 	created := IsCreatedByTugbot(
 		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.True(t, created)
 }
 
 func TestIsCreatedByTugbot_False(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true"}
+	attributes := map[string]string{TugbotTest: "true"}
 	created := IsCreatedByTugbot(
 		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.False(t, created)
@@ -26,14 +27,14 @@ func TestIsCreatedByTugbot_NoAttributes(t *testing.T) {
 }
 
 func TestIsSwarmTask_True(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb", LabelDockerSwarmTaskID: "a123b"}
+	attributes := map[string]string{TugbotTest: "true", TugbotCreatedFrom: "aabb", SwarmTaskID: "a123b"}
 	created := IsSwarmTask(
 		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.True(t, created)
 }
 
 func TestIsSwarmTask_False(t *testing.T) {
-	attributes := map[string]string{LabelTest: "true", LabelCreatedFrom: "aabb"}
+	attributes := map[string]string{TugbotTest: "true", TugbotCreatedFrom: "aabb"}
 	created := IsSwarmTask(
 		&dockerclient.Event{Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.False(t, created)

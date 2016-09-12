@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"fmt"
-
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/gaia-docker/tugbot/container/mockclient"
 	"github.com/samalba/dockerclient"
@@ -18,7 +16,12 @@ var stateExited = &dockerclient.State{Running: false, Dead: false, StartedAt: ti
 
 func TestRun_StartEvent(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "start"},
+		Labels: map[string]string{
+			container.TugbotTest:        "true",
+			container.TugbotEventDocker: "",
+			container.TypeFilter:        "container",
+			container.ActionFilter:      "start",
+		},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -36,14 +39,18 @@ func TestRun_StartEvent(t *testing.T) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
 		}).Return(nil)
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
+	err := Run(client, []string{}, &dockerclient.Event{Type: "container", Action: "start"})
 	assert.NoError(t, err)
 	client.AssertExpectations(t)
 }
 
 func TestRun_CallByEventType(t *testing.T) {
 	cc1 := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "create"},
+		Labels: map[string]string{
+			container.TugbotTest:        "true",
+			container.TugbotEventDocker: "",
+			container.ActionFilter:      "create",
+		},
 	}
 	c1 := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -54,7 +61,11 @@ func TestRun_CallByEventType(t *testing.T) {
 		nil,
 	)
 	cc2 := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "start"},
+		Labels: map[string]string{
+			container.TugbotTest:        "true",
+			container.TugbotEventDocker: "",
+			container.ActionFilter:      "start",
+		},
 	}
 	c2 := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -67,25 +78,19 @@ func TestRun_CallByEventType(t *testing.T) {
 
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c1, c2}, nil)
-	var called []string
-	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
-		Run(func(args mock.Arguments) {
-			called = append(called, args.Get(0).(container.Container).Name())
-		}).Return(nil)
+	client.On("StartContainerFrom", c2).Return(nil)
 
-	err := Run(client, []string{c2.Name()}, &dockerclient.Event{Status: "start"})
-	fmt.Println("efffi ", called)
+	err := Run(client, []string{c1.Name(), c2.Name()}, &dockerclient.Event{Type: "container", Action: "start"})
+
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(called))
-	assert.Equal(t, c2.Name(), called[0])
 	client.AssertExpectations(t)
 }
 
 func TestRun_EventCreatedByTugbot(t *testing.T) {
 	client := mockclient.NewMockClient()
 
-	attributes := map[string]string{container.LabelTest: "true",
-		container.LabelCreatedFrom: "aabb"}
+	attributes := map[string]string{container.TugbotTest: "true",
+		container.TugbotCreatedFrom: "aabb"}
 	err := Run(client, []string{}, &dockerclient.Event{Status: "start",
 		Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.NoError(t, err)
@@ -95,8 +100,8 @@ func TestRun_EventCreatedByTugbot(t *testing.T) {
 func TestRun_NoCandidates(t *testing.T) {
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{}, nil)
-
-	Run(client, []string{}, &dockerclient.Event{Status: "start"})
+	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
+	assert.NoError(t, err)
 	client.AssertExpectations(t)
 }
 
@@ -112,7 +117,11 @@ func TestRun_ErrorListContainers(t *testing.T) {
 
 func TestRun_ErrorStartContainerFrom(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true", container.LabelEvents: "start"},
+		Labels: map[string]string{
+			container.TugbotTest:        "true",
+			container.TugbotEventDocker: "",
+			container.ActionFilter:      "start",
+		},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -125,19 +134,18 @@ func TestRun_ErrorStartContainerFrom(t *testing.T) {
 
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
-	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
-		Run(func(args mock.Arguments) {
-			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
-		}).Return(errors.New("whoops"))
+	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).Return(errors.New("whoops"))
 
-	err := Run(client, []string{}, &dockerclient.Event{Status: "start"})
-	assert.NoError(t, err)
+	err := Run(client, []string{}, &dockerclient.Event{Type: "container", Action: "start"})
+
+	assert.Error(t, err)
+	assert.EqualError(t, err, "whoops")
 	client.AssertExpectations(t)
 }
 
 func TestFilterName_True(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true"},
+		Labels: map[string]string{container.TugbotTest: "true"},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -153,7 +161,7 @@ func TestFilterName_True(t *testing.T) {
 
 func TestFilterNoName_True(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true"},
+		Labels: map[string]string{container.TugbotTest: "true"},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -169,7 +177,7 @@ func TestFilterNoName_True(t *testing.T) {
 
 func TestFilterName_False(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true"},
+		Labels: map[string]string{container.TugbotTest: "true"},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -185,7 +193,7 @@ func TestFilterName_False(t *testing.T) {
 
 func TestFilterContainerStateRunning_False(t *testing.T) {
 	cc := &dockerclient.ContainerConfig{
-		Labels: map[string]string{container.LabelTest: "true"},
+		Labels: map[string]string{container.TugbotTest: "true"},
 	}
 	c := *container.NewContainer(
 		&dockerclient.ContainerInfo{
@@ -202,7 +210,7 @@ func TestFilterContainerStateRunning_False(t *testing.T) {
 func TestRun_EventSwarmTask(t *testing.T) {
 	client := mockclient.NewMockClient()
 
-	attributes := map[string]string{container.LabelDockerSwarmTaskID: "123hh"}
+	attributes := map[string]string{container.SwarmTaskID: "123hh"}
 	err := Run(client, []string{}, &dockerclient.Event{Status: "start",
 		Actor: dockerclient.Actor{Attributes: attributes}})
 	assert.NoError(t, err)

@@ -68,7 +68,7 @@ func (client dockerClient) StartContainerFrom(c Container) error {
 	if config.Labels == nil {
 		config.Labels = make(map[string]string)
 	}
-	config.Labels[LabelCreatedFrom] = name
+	config.Labels[TugbotCreatedFrom] = name
 
 	log.Debugf("Starting container from %s", name)
 	var err error

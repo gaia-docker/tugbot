@@ -72,7 +72,7 @@ func TestIsTugbot_True(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTugbot: "true"},
+				Labels: map[string]string{TugbotService: "true"},
 			},
 		},
 	}
@@ -84,7 +84,7 @@ func TestIsTugbot_WrongLabelValue(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTugbot: "false"},
+				Labels: map[string]string{TugbotService: "false"},
 			},
 		},
 	}
@@ -104,38 +104,12 @@ func TestIsTugbot_NoLabel(t *testing.T) {
 	assert.False(t, c.IsTugbot())
 }
 
-func TestStopSignal_Present(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{
-					LabelStopSignal: "SIGQUIT",
-				},
-			},
-		},
-	}
-
-	assert.Equal(t, "SIGQUIT", c.StopSignal())
-}
-
-func TestStopSignal_NoLabel(t *testing.T) {
-	c := Container{
-		containerInfo: &dockerclient.ContainerInfo{
-			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{},
-			},
-		},
-	}
-
-	assert.Equal(t, "", c.StopSignal())
-}
-
 func TestIsTugbotCandidate_True(t *testing.T) {
 	c := Container{
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true"},
+				Labels: map[string]string{TugbotTest: "true"},
 			},
 		},
 	}
@@ -148,7 +122,7 @@ func TestIsTugbotCandidate_TrueRunTimestampLabelEmpty(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelCreatedFrom: ""},
+				Labels: map[string]string{TugbotTest: "true", TugbotCreatedFrom: ""},
 			},
 		},
 	}
@@ -161,7 +135,7 @@ func TestIsTugbotCandidate_FalseRunningState(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: &dockerclient.State{Running: true, Dead: false, StartedAt: time.Now()},
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true"},
+				Labels: map[string]string{TugbotTest: "true"},
 			},
 		},
 	}
@@ -185,7 +159,7 @@ func TestIsTugbotCandidate_FalseIncludeRunTimestampLabel(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelCreatedFrom: "2016-06-05 16:48:01.9042582 +0300 IDT"},
+				Labels: map[string]string{TugbotTest: "true", TugbotCreatedFrom: "2016-06-05 16:48:01.9042582 +0300 IDT"},
 			},
 		},
 	}
@@ -198,12 +172,17 @@ func TestIsEventListener_True(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy"},
+				Labels: map[string]string{
+					TugbotTest:        "true",
+					TugbotEventDocker: "",
+					TypeFilter:        "container",
+					ActionFilter:      "start",
+				},
 			},
 		},
 	}
 
-	assert.True(t, c.IsEventListener(&dockerclient.Event{Status: "start"}))
+	assert.True(t, c.IsEventListener(&dockerclient.Event{Type: "container", Action: "start"}))
 }
 
 func TestIsEventListener_False(t *testing.T) {
@@ -211,12 +190,12 @@ func TestIsEventListener_False(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy"},
+				Labels: map[string]string{TugbotTest: "true", TugbotEventDocker: "", TypeFilter: "container", ActionFilter: "create,start,destroy"},
 			},
 		},
 	}
 
-	assert.False(t, c.IsEventListener(&dockerclient.Event{Status: "foo"}))
+	assert.False(t, c.IsEventListener(&dockerclient.Event{Action: "unexpected"}))
 }
 
 func TestContainerIsCreatedByTugbot_Ture(t *testing.T) {
@@ -224,7 +203,7 @@ func TestContainerIsCreatedByTugbot_Ture(t *testing.T) {
 		containerInfo: &dockerclient.ContainerInfo{
 			State: stateExited,
 			Config: &dockerclient.ContainerConfig{
-				Labels: map[string]string{LabelTest: "true", LabelEvents: "create,start,destroy", LabelCreatedFrom: "aabb"},
+				Labels: map[string]string{TugbotTest: "true", TugbotEventDocker: "", TypeFilter: "container", ActionFilter: "create,start,destroy", TugbotCreatedFrom: "aabb"},
 			},
 		},
 	}

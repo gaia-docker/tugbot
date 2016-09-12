@@ -1,6 +1,8 @@
 package actions
 
 import (
+	"errors"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
@@ -11,22 +13,28 @@ import (
 // For each test container it'll create and start a new container according
 // to tugbots' labels.
 func Run(client container.Client, names []string, e *dockerclient.Event) error {
-	log.Debugf("Dcoker event: %s", e)
+	log.Debugf("Docker event: %+v", e)
+	var cerr error
 	if !container.IsSwarmTask(e) && !container.IsCreatedByTugbot(e) {
 		candidates, err := client.ListContainers(containerFilter(names))
 		if err != nil {
 			return err
 		}
-		for _, currCandidate := range candidates {
-			if currCandidate.IsEventListener(e) {
-				if err := client.StartContainerFrom(currCandidate); err != nil {
+		for _, candidate := range candidates {
+			if candidate.IsEventListener(e) {
+				if err := client.StartContainerFrom(candidate); err != nil {
 					log.Error(err)
+					// combine errors
+					if cerr == nil {
+						cerr = err
+					} else {
+						cerr = errors.New(cerr.Error() + err.Error())
+					}
 				}
 			}
 		}
 	}
-
-	return nil
+	return cerr
 }
 
 func containerFilter(names []string) container.Filter {

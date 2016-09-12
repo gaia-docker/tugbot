@@ -109,7 +109,7 @@ func TestStartContainerFrom_Success(t *testing.T) {
 	api := mockclient.NewMockClient()
 	api.On("CreateContainer",
 		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
-			return config.Labels[LabelCreatedFrom] == "foo"
+			return config.Labels[TugbotCreatedFrom] == "foo"
 		}),
 		mock.MatchedBy(func(name string) bool {
 			return strings.HasPrefix(name, "tugbot_foo_")
@@ -139,7 +139,7 @@ func TestStartContainerFrom_CreateContainerError(t *testing.T) {
 	api := mockclient.NewMockClient()
 	api.On("CreateContainer",
 		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
-			return config.Labels[LabelCreatedFrom] == "foo"
+			return config.Labels[TugbotCreatedFrom] == "foo"
 		}),
 		mock.MatchedBy(func(name string) bool {
 			return strings.HasPrefix(name, "tugbot_foo_")
@@ -168,7 +168,7 @@ func TestStartContainerFrom_StartContainerError(t *testing.T) {
 	api := mockclient.NewMockClient()
 	api.On("CreateContainer",
 		mock.MatchedBy(func(config *dockerclient.ContainerConfig) bool {
-			return config.Labels[LabelCreatedFrom] == "foo"
+			return config.Labels[TugbotCreatedFrom] == "foo"
 		}),
 		mock.MatchedBy(func(name string) bool {
 			return strings.HasPrefix(name, "tugbot_foo_")

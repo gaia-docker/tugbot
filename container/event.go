@@ -8,7 +8,7 @@ import (
 // IsCreatedByTugbot - true if created by tugbot
 func IsCreatedByTugbot(e *dockerclient.Event) bool {
 	ret := false
-	if "" != e.Actor.Attributes[LabelCreatedFrom] {
+	if "" != e.Actor.Attributes[TugbotCreatedFrom] {
 		ret = true
 	}
 
@@ -18,7 +18,7 @@ func IsCreatedByTugbot(e *dockerclient.Event) bool {
 // IsSwarmTask - true if container is a swarm task
 func IsSwarmTask(e *dockerclient.Event) bool {
 	ret := false
-	taskID := e.Actor.Attributes[LabelDockerSwarmTaskID]
+	taskID := e.Actor.Attributes[SwarmTaskID]
 	if "" != taskID {
 		log.Debugf("Swarm service task event (task ID: %s, %v)", taskID, e)
 		ret = true

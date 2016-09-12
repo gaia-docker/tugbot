@@ -9,13 +9,29 @@ import (
 
 // Docker container labels
 const (
-	LabelTugbot      = "tugbot.service"
-	LabelTest        = "tugbot.test"
-	LabelEvents      = "tugbot.event.docker"
-	LabelCreatedFrom = "tugbot.created.from"
-	LabelStopSignal  = "tugbot.stop-signal"
+	TugbotService     = "tugbot.service"
+	TugbotTest        = "tugbot.test"
+	TugbotEventDocker = "tugbot.event.docker"
+	TugbotCreatedFrom = "tugbot.created.from"
+	SwarmTaskID       = "com.docker.swarm.task.id"
+)
 
-	LabelDockerSwarmTaskID = "com.docker.swarm.task.id"
+// Docker Event Filter
+const (
+	// Re2Prefix re2 regexp string prefix
+	Re2Prefix = "re2:"
+	// type filter: tugbot.event.docker.filter.type=container|image|daemon|network|volume|plugin
+	TypeFilter = "tugbot.event.docker.filter.type"
+	// action filter (depends on type), for 'container' type:
+	//  - attach, commit, copy, create, destroy, detach, die, exec_create, exec_detach, exec_start, export,
+	//  - health_status, kill, oom, pause, rename, resize, restart, start, stop, top, unpause, update
+	ActionFilter = "tugbot.event.docker.filter.action"
+	// container filter: use name, comma separated name list or RE2 regexp
+	ContainerFilter = "tugbot.event.docker.filter.container"
+	// image filter: use name, comma separated name list or RE2 regexp
+	ImageFilter = "tugbot.event.docker.filter.image"
+	// label filter: use key=value comma separated pairs
+	LabelFilter = "tugbot.event.docker.filter.label"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -66,20 +82,9 @@ func (c Container) ImageName() string {
 // The tugbot container is identified by the presence of the "tugbot.service"
 // label in the container metadata.
 func (c Container) IsTugbot() bool {
-	val, ok := c.containerInfo.Config.Labels[LabelTugbot]
+	val, ok := c.containerInfo.Config.Labels[TugbotService]
 
 	return ok && val == "true"
-}
-
-// StopSignal returns the custom stop signal (if any) that is encoded in the
-// container's metadata. If the container has not specified a custom stop
-// signal, the empty string "" is returned.
-func (c Container) StopSignal() string {
-	if val, ok := c.containerInfo.Config.Labels[LabelStopSignal]; ok {
-		return val
-	}
-
-	return ""
 }
 
 // IsTugbotCandidate returns whether or not a container is a candidate to run by tugbot.
@@ -87,7 +92,7 @@ func (c Container) StopSignal() string {
 // it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
 func (c Container) IsTugbotCandidate() bool {
 	ret := false
-	val, ok := c.containerInfo.Config.Labels[LabelTest]
+	val, ok := c.containerInfo.Config.Labels[TugbotTest]
 	if ok && val == "true" {
 		if !c.IsCreatedByTugbot() {
 			ret = c.containerInfo.State.StateString() == "exited"
@@ -99,7 +104,7 @@ func (c Container) IsTugbotCandidate() bool {
 
 // IsCreatedByTugbot returns whether or not a container created by tugbot.
 func (c Container) IsCreatedByTugbot() bool {
-	val, ok := c.containerInfo.Config.Labels[LabelCreatedFrom]
+	val, ok := c.containerInfo.Config.Labels[TugbotCreatedFrom]
 
 	return ok && val != ""
 }
@@ -108,8 +113,39 @@ func (c Container) IsCreatedByTugbot() bool {
 func (c Container) IsEventListener(e *dockerclient.Event) bool {
 	ret := false
 	if e != nil {
-		events, ok := c.containerInfo.Config.Labels[LabelEvents]
-		ret = ok && sliceContains(e.Status, strings.Split(events, ","))
+		// check if container is subscribed to Docker events, i.e. 'tugbot.event.docker' label exists
+		_, ret = c.containerInfo.Config.Labels[TugbotEventDocker]
+		if ret {
+			// filter by event type
+			if typeFilter, ok := c.containerInfo.Config.Labels[TypeFilter]; ok {
+				ret = sliceContains(e.Type, splitAndTrimSpaces(typeFilter, ","))
+			}
+			// filter by event action
+			if actionFilter, ok := c.containerInfo.Config.Labels[ActionFilter]; ok {
+				ret = ret && sliceContains(e.Action, splitAndTrimSpaces(actionFilter, ","))
+			}
+			// filter by container name or name regexp
+			if containerFilter, ok := c.containerInfo.Config.Labels[ContainerFilter]; ok {
+				ret = ret && inFilterOrList(e.Actor.Attributes["name"], containerFilter)
+			}
+		}
+		// filter by event image
+		if imageFilter, ok := c.containerInfo.Config.Labels[ImageFilter]; ok {
+			// get image name from event.From field
+			imageName := e.From
+			// in case of "image" event.Type, event.ID contains image ID (name:tag) for 'pull' action and sha256:num for untag and delete
+			if e.Type == "image" {
+				imageName = e.ID
+			}
+			ret = ret && inFilterOrList(imageName, imageFilter)
+		}
+		// filter by event labels
+		if labelFilter, ok := c.containerInfo.Config.Labels[LabelFilter]; ok {
+			labels := splitAndTrimSpaces(labelFilter, ",")
+			for _, label := range labels {
+				ret = ret && mapContains(e.Actor.Attributes, splitAndTrimSpaces(label, "="))
+			}
+		}
 	}
 
 	return ret

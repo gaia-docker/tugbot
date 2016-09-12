@@ -125,8 +125,10 @@ func waitForInterrupt() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 	<-c
+	log.Debug("Stop monitoring events ...")
 	wg.Wait()
 	client.StopAllMonitorEvents()
+	log.Debug("Graceful exit :-)")
 	os.Exit(1)
 }
 
