@@ -21,8 +21,6 @@ dependencies:
     - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot -w /go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/go_build.sh
     # create tugbot docker image
     - docker build -t $IMAGE_NAME .
-    - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
-    - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BRANCH
 test:
   override:
     # run tugbot tests and generate junit.xml reports
@@ -36,6 +34,9 @@ deployment:
   continuous:
     branch: [master, develop, /feature_.*/]
     commands:
+      # tag image with CircleCi branch and build
+      - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
+      - docker tag $IMAGE_NAME $IMAGE_NAME:$CIRCLE_BRANCH
       # deply image to DockerHub
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push $IMAGE_NAME
