@@ -5,66 +5,105 @@
 [![codecov](https://codecov.io/gh/gaia-docker/tugbot/branch/master/graph/badge.svg)](https://codecov.io/gh/gaia-docker/tugbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gaia-docker/tugbot)](https://goreportcard.com/report/github.com/gaia-docker/tugbot)
 [![Docker](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
-[![Docker Image Layers](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest 'Get your own badge on imagelayers.io')
+[![Docker Image Layers](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest)
 
-**Tugbot** is an Continuous Testing Framework for Docker based production/staging/testing environment. **Tugbot** executes *test containers* on some *event*.
+## What is Tugbot?
+
+It's widely accepted to run tests during CI build flow, but there are also some problems with this default approach. Here is a non complete list of such problems:
+
+- It's not easy to create realistic test environment (close to production) with underlying infrastructure and different configurations.
+- Integration tests might require access to "non-exposed" services and also highly depend on infrastructure and configuration.
+- Some tests takes too long to run during CI build, for example: performance/stress tests, security tests, scans, background job tests, etc. Selecting appropriate tests for CI job is always balance between speed and simplicity of execution and "safety net" (how much tests need to be run to feel safe).
+- Move to microservice architecture (tens and hundreds of micro services) and to Continuous Deployment (CD). Now every service has a separate CI pipeline for build/test/deploy and teams can achieve multiple deployments per day. Running too many tests or integration tests for each commit is a huge overhead and can become a team productivity "bottle neck".
+
+The idea behind **Continuous Testing** is to execute tests, that require access to underlying infrastructure and to internal services or takes too much time to run, or need to be run on very specific infrastructure, inside real Docker cluster. Such tests should be run 24x7 with test execution triggered by timer or change event (service update, host OS update, configuration change, etc.)
+
+**Tugbot** is in-cluster Continuous Testing Framework for Docker based runtime environments: like testing, staging, production.
+**Tugbot** extends testing into deployment environments. It executes tests in response to different **change events** or periodically, collects test results and upload collected results to Test Analytics service.
 
 **Check out the demo flow (including video) [here](https://github.com/gaia-docker/example-voting-app/blob/master/DEMO-FLOW.md)**
 
-User may use an automation tool (e.g. Chef, Ansible, etc) or Docker scheduler (Kubernetes, Swarm/Compose, etc.) to deploy and run application containers. **Tugbot** does not force the user to learn a new paradigm for deployment and execution of Docker containers. 
+## How does Tugbot execute tests?
 
-> **Tugbot** is not responsible for **first** run of *test container*
+**Tugbot** can automatically detect and execute tests, packaged into Docker container. We call these containers - **Test Containers**. *Test container* is a regular Docker container. **Tugbot** uses Docker `LABEL` to discover *test container* and some **Tugbot** related test metadata. These labels can be part of image or can be specified at runtime, using `--label` option of `docker run` command.
 
-**Tugbot** performs **subsequent** *test container* execution(s) on specified Docker *event* (create, run, others...).
+> **Tugbot** is not responsible for **deployment** and **first** run of *test container*
 
-> **Tugbot** ignores Docker Swarms' tasks events
+**Tugbot** does not specify how to deploy and run application and *test* containers: user ay use an automation tool (Chef, Ansible, ...) or Docker scheduler (Kubernetes, Swarm, Nomad, ...). **Tugbot** will trigger a sequential *test container* execution on specified *events*.
 
-**Tugbot Leader** performs **subsequent** *test service* execution(s) on specified Docker Swarm Service *event*
-
-## Test Container
-
-*Test container* is a regular Docker container. We use Docker `LABEL` to discover *test container* and **Tugbot** related test metadata. These labels can be part of image or can be specified at runtime, using `--label` `docker run` option.
-**Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot.event.*` labels).
-
-### Tugbot labels
+### Tugbot Labels
 
 All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflict with other labels.
 
-- `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container as a *test container*
+- `tugbot.test` - this is a *test container* discovery label; without it, **Tugbot** will not recognize this container as a *test container*
 - `tugbot.results.dir` - directory, where *test container* reports test results; default to `/var/tests/results`
-- `tugbot.event.docker` - list of comma separated Docker events
+- `tugbot.event.docker` - marker label (no value is required) to subscribe **test container** to Docker events
+- `tugbot.event.docker.filter.type` - Docker event type filter; can be one of `container, image, daemon, network, plugin, volume`
+- `tugbot.event.docker.filter.action` - Docker event action (event type specific); multiple actions can be defined (comma separated)
+- - `container` event type actions: `attach, commit, copy, create, destroy, detach, die, exec_create, exec_detach, exec_start, export, health_status, kill, oom, pause, rename, resize, restart, start, stop, top, unpause, update`
+- - `image` event type actions: `delete, import, load, pull, push, save, tag, untag`
+- - `plugin` event type actions: `install, enable, disable, remove`
+- - `volume` event type actions: `create, mount, unmount, destroy`
+- - `network` event type actions: `create, connect, disconnect, destroy`
+- - `daemon` event type action: `reload`
+- `tugbot.event.docker.filter.container` - container name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this label to trigger test execution for events coming from these containers.
+- `tugbot.event.docker.filter.image` - image name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this filter to limit events coming from Docker images or containers created from these images
+- `tugbot.event.docker.filter.label` - filter events coming from resource (container, image, volume, network), that has specified labels (and optionally values); this can be comma separated list of `key=value` pairs.
 
 #####Example (Dockerfile):
 ```
-LABEL tugbot.test=true
+...
+# this is Tugbot Test Container
+LABEL tugbot.test
+
+# test results are saved into `/var/tests/results`
 LABEL tugbot.results.dir=/var/tests/results
-LABEL tugbot.event.docker=start
+
+# subscribe to Docker events
+LABEL tugbot.event.docker
+
+# filter by event type == `container`
+LABEL tugbot.event.docker.filter.type=container
+
+# filter by event action: either `start` or `stop`
+LABEL tugbot.event.docker.filter.action=start,stop
+
+# subscribe to events from all containers with name prefix `hp...`
+LABEL tugbot.event.docker.filter.container=re2:^hp
+...
 ```
 
 ## Tugbot Run Service
 
 ```
-tugbot ... [container, container ...]
+$ tugbot help
+
+NAME:
+   Tugbot - Tugbot is a continuous testing framework for Docker based environments. Tugbot monitors changes in a runtime environment (host, os, container), runs tests (packaged into Test Containers), when event occurred and collects test results.
+
+USAGE:
+   tugbot [global options] command [command options] test containers: name, list of names, or none (for all test containers)
+
+VERSION:
+   v0.2.0
+
+COMMANDS:
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --host value, -H value  daemon socket to connect to (default: "unix:///var/run/docker.sock") [$DOCKER_HOST]
+   --tls                   use TLS; implied by --tlsverify
+   --tlsverify             use TLS and verify the remote [$DOCKER_TLS_VERIFY]
+   --tlscacert value       trust certs signed only by this CA (default: "/etc/ssl/docker/ca.pem")
+   --tlscert value         client certificate for TLS authentication (default: "/etc/ssl/docker/cert.pem")
+   --tlskey value          client key for TLS authentication (default: "/etc/ssl/docker/key.pem")
+   --debug                 enable debug mode with verbose logging
+   --help, -h              show help
+   --version, -v           print the version
 ```
-
-`run` - run specified *test containers*, based on further configuration. If no container specified, **Tugbot** will run all *test containers* on current Docker host.
-
-By default, **Tugbot** inspects *test container* configuration: to know when to run *test container* and where to look for test results.
-
-### Run Options
-
-- `--host, -h`             Docker daemon socket to connect to. Defaults to "unix:///var/run/docker.sock" but can be pointed at a remote Docker host by specifying a TCP endpoint as "tcp://hostname:port". The host value can also be provided by setting the `DOCKER_HOST` environment variable.
-- `--tls`                  Use TLS when connecting to the Docker socket but do NOT verify the server's certificate. If you are connecting a TCP Docker socket protected by TLS you'll need to use either this flag or the `--tlsverify` flag (described below). The `--tlsverify` flag is preferred as it will cause the server's certificate to be verified before a connection is made.
-- `--tlsverify`            Use TLS when connecting to the Docker socket and verify the server's certificate. If you are connecting a TCP Docker socket protected by TLS you'll need to use either this flag or the `--tls` flag (describe above).
-- `--tlscacert`            Trust only certificates signed by this CA. Used in conjunction with the `--tlsverify` flag to identify the CA certificate which should be used to verify the identity of the server. The value for this flag can be either the fully-qualified path to the *.pem* file containing the CA certificate or a string containing the CA certificate itself. Defaults to "/etc/ssl/docker/ca.pem".
-- `--tlscert`              Client certificate for TLS authentication. Used in conjunction with the `--tls` or `--tlsverify` flags to identify the certificate to use for client authentication. The value for this flag can be either the fully-qualified path to the *.pem* file containing the client certificate or a string containing the certificate itself. Defaults to "/etc/ssl/docker/cert.pem".
-- `--tlskey`               Client key for TLS authentication. Used in conjunction with the `--tls` or `--tlsverify` flags to identify the key to use for client authentication. The value for this flag can be either the fully-qualified path to the *.pem* file containing the client key or a string containing the key itself. Defaults to "/etc/ssl/docker/key.pem".
-- `--debug`                Enable debug mode. When this option is specified you'll see more verbose logging in the **Tugbot** log file.
-* `--help`                 Show documentation about the supported flags.
-* `--version, -v`          Print `tugbot` version
 
 ## Running Tugbot inside a Docker container
 
-```bash
-docker run -d --name tugbot --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot
+```
+$ docker run -d --name tugbot-run --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot:master
 ```
