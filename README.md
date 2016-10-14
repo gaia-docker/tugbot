@@ -7,6 +7,10 @@
 [![Docker](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
 [![Docker Image Layers](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest)
 
+## Join the Community
+
+If you are interested in joining our community on [Slack](https://tugbot.slack.com), let us know. We look forward to your contributions. We gladly accept pull requests. 
+
 ## What is Tugbot?
 
 It's widely accepted to run tests during CI build flow, but there are also some problems with this default approach. Here is a non complete list of such problems:
@@ -108,6 +112,3 @@ GLOBAL OPTIONS:
 $ docker run -d --name tugbot-run --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot:master
 ```
 
-## Join the Community
-
-If you are interested in joining our community on [Slack](https://tugbot.slack.com), let us know. We look forward to your contributions. We gladly accept pull requests. 
