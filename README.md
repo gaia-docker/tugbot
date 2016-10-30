@@ -9,7 +9,7 @@
 
 ## Join the Community
 
-If you are interested in joining our community on [Slack](https://tugbot.slack.com), let us know. We look forward to your contributions. We gladly accept pull requests. 
+If you are interested in joining our community on [Slack](https://tugbot.slack.com/signup), let us know. We look forward to your contributions. We gladly accept pull requests. 
 
 ## What is Tugbot?
 
