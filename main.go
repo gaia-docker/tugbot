@@ -123,9 +123,9 @@ func start(c *cli.Context) {
 
 func startMonitorEvents(c *cli.Context) {
 	client.StartMonitorEvents(runTestContainers)
-	webhook := c.GlobalString("webhook")
-	if webhook != "" {
-		publisher = event.NewPublisher(strings.Split(webhook, ";"))
+	webhooks := c.GlobalString("webhooks")
+	if webhooks != "" {
+		publisher = event.NewPublisher(strings.Split(webhooks, ";"))
 		client.StartMonitorEvents(publishEvent)
 	}
 }
