@@ -13,15 +13,18 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
+	"github.com/gaia-docker/tugbot-common/event"
 	"github.com/gaia-docker/tugbot/actions"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
 )
 
 var (
-	wg     sync.WaitGroup
-	client container.Client
-	names  []string
+	client    container.Client
+	names     []string
+	wgr       sync.WaitGroup
+	wgp       sync.WaitGroup
+	publisher event.Publisher
 )
 
 const (
@@ -82,6 +85,12 @@ func main() {
 			Name:  "debug",
 			Usage: "enable debug mode with verbose logging",
 		},
+		cli.StringFlag{
+			Name:   "webhooks",
+			Usage:  "list of urls sperated by ';'",
+			Value:  "http://result-service:8080/events",
+			EnvVar: "TUGBOT_WEBHOOKS",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -107,17 +116,32 @@ func before(c *cli.Context) error {
 
 func start(c *cli.Context) {
 	names = c.Args()
-	client.StartMonitorEvents(eventCallback)
+	startMonitorEvents(c)
 	log.Info("Tugbot Started OK")
 	waitForInterrupt()
 }
 
-func eventCallback(e *dockerclient.Event, ec chan error, args ...interface{}) {
-	wg.Add(1)
+func startMonitorEvents(c *cli.Context) {
+	client.StartMonitorEvents(runTestContainers)
+	webhook := c.GlobalString("webhook")
+	if webhook != "" {
+		publisher = event.NewPublisher(strings.Split(webhook, ";"))
+		client.StartMonitorEvents(publishEvent)
+	}
+}
+
+func runTestContainers(e *dockerclient.Event, ec chan error, args ...interface{}) {
+	wgr.Add(1)
 	if err := actions.Run(client, names, e); err != nil {
 		log.Error(err)
 	}
-	wg.Done()
+	wgr.Done()
+}
+
+func publishEvent(e *dockerclient.Event, ec chan error, args ...interface{}) {
+	wgp.Add(1)
+	publisher.Publish(e)
+	wgp.Done()
 }
 
 func waitForInterrupt() {
@@ -126,7 +150,7 @@ func waitForInterrupt() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 	<-c
 	log.Debug("Stop monitoring events ...")
-	wg.Wait()
+	wgr.Wait()
 	client.StopAllMonitorEvents()
 	log.Debug("Graceful exit :-)")
 	os.Exit(1)
