@@ -1,50 +1,18 @@
-hash: 367fd6f8f2ed13a8a20b2b83fc4a7af88e71005a77d7232bf65cba19d5c16388
-updated: 2016-08-11T13:36:34.600413681+03:00
+hash: 8292cd22eda0c976ef4e145f23ad734507addedb3c6512887d84c4fb81e4a07d
+updated: 2016-11-17T19:36:50.249261013+02:00
 imports:
 - name: github.com/codegangsta/cli
-  version: 1efa31f08b9333f1bd4882d61f9d668a70cd902e
+  version: a14d7d367bc02b1f57d88de97926727f2d936387
 - name: github.com/davecgh/go-spew
-  version: 2df174808ee097f90d259e432cc04442cf60be21
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
-- name: github.com/docker/distribution
-  version: a9b1322edf48b1fb9aee4e5ded7a4f4ac37c6830
-  subpackages:
-  - context
-  - uuid
-- name: github.com/docker/engine-api
-  version: 0df83fcc24fb4a997df5537526306fb55aa5dca8
-  subpackages:
-  - client
-  - types/swarm
-  - client/transport
-  - client/transport/cancellable
-  - types
-  - types/container
-  - types/filters
-  - types/network
-  - types/registry
-  - types/time
-  - types/blkiodev
-  - types/strslice
-- name: github.com/docker/go-connections
-  version: 0bad1a3951398f88ef4dd75fdb42af374430be89
-  subpackages:
-  - sockets
-  - tlsconfig
-  - nat
 - name: github.com/docker/go-units
   version: eb879ae3e2b84e2a142af415b679ddeda47ec71c
-- name: github.com/gorilla/context
-  version: 14f550f51af52180c2eefed15e5fd18d63c0a64a
-- name: github.com/gorilla/mux
-  version: e444e69cbd2e2e3e0749a2f3c717cec491552bbf
-- name: github.com/Microsoft/go-winio
-  version: ce2922f643c8fd76b46cadc7f404a06282678b34
-- name: github.com/opencontainers/runc
-  version: 0f764571384a3ff16c6fed25ace5b7c83f0f0379
+- name: github.com/gaia-docker/tugbot-common
+  version: c4f50c8f7e07d5268c0e59f198c0a32ab9be278e
   subpackages:
-  - libcontainer/user
+  - event
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
@@ -54,27 +22,16 @@ imports:
   subpackages:
   - mockclient
 - name: github.com/Sirupsen/logrus
-  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/stretchr/objx
   version: cbeaeb16a013161a98496fad62933b1d21786672
 - name: github.com/stretchr/testify
-  version: f390dcf405f7b83c997eac1b06768bb9f44dec18
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - mock
   - assert
-- name: golang.org/x/net
-  version: 4876518f9e71663000c348837735820161a42df7
-  subpackages:
-  - context
-  - context/ctxhttp
-  - http2
-  - http2/hpack
-  - internal/timeseries
-  - trace
-  - proxy
 - name: golang.org/x/sys
   version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
   - unix
-  - windows
 testImports: []
