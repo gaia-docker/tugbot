@@ -1,5 +1,5 @@
 ## Data we would like that "tugbot collect" will send to Result Service:
-1. container info (using docker inspect, contains data such as exit code, start time, end time, labels, etc..)
+1. Container info (using docker inspect, contains data such as exit code, start time, end time, labels, etc..)
 2. Console output
 3. Results folder 
 
@@ -8,7 +8,6 @@ For first implementation we prefer REST API - it is simpler to implement it that
 Later on we can add webhook support for both "collect" and "Result Service" as this is more generic and simplifies authentication from "collect" perspective.
 
 ## API Design
-
 ```
 Contect-Type: "application/gzip", "application/json"
 POST on http://result-service:8080/results?docker.imagename=gaia-integartion-tests:latest&mainfile=results.txt&exitcode=1&start-time=2016-05-30 14:00&end-time=2016-05-30 14:05&...
@@ -57,5 +56,29 @@ Example of body:
       }
     ]
   }
+}
+```
+
+## _tugbot run_ events
+
+_tugbot run_ executes tests in response to different events & publish events' data as a webhook. Result service can index those events' data into elasticsearch.
+This allows us to create a graph that correlate test failures and environment events, which we are using in order to do analysis of how environment changes, like deploy a new docker image, impacts quality.
+
+```
+Contect-Type: "application/json"
+POST on http://result-service:8080/events
+```
+
+Example of body:
+```json
+{
+  "Type": "docker container",
+  "ID": "93ce780df3095f631d2a64f02a356d51dd287311488df84e84adc947a8f2e332",
+  "StartedAt": "2016-07-25T18:24:20.572308911Z",
+  "FinishedAt": "2016-07-25T18:24:21.549659751Z",
+  "Tag": "latest",
+  "From": "perl",
+  "Action": "run",
+  "Status": "up"
 }
 ```
