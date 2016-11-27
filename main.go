@@ -29,7 +29,7 @@ var (
 
 const (
 	// Release version
-	Release = "v0.2.0"
+	Release = "v0.3.0"
 )
 
 func init() {
@@ -88,7 +88,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "webhooks",
 			Usage:  "list of urls sperated by ';'",
-			Value:  "http://result-service:8080/events",
+			Value:  "http://result-service:8081/events",
 			EnvVar: "TUGBOT_WEBHOOKS",
 		},
 	}

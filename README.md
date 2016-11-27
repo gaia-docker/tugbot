@@ -89,13 +89,14 @@ USAGE:
    tugbot [global options] command [command options] test containers: name, list of names, or none (for all test containers)
 
 VERSION:
-   v0.2.0
+   v0.3.0
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --host value, -H value  daemon socket to connect to (default: "unix:///var/run/docker.sock") [$DOCKER_HOST]
+   --webhooks              list of urls sperated by ';' (default: http://result-service:8081/events) [$TUGBOT_WEBHOOKS]
    --tls                   use TLS; implied by --tlsverify
    --tlsverify             use TLS and verify the remote [$DOCKER_TLS_VERIFY]
    --tlscacert value       trust certs signed only by this CA (default: "/etc/ssl/docker/ca.pem")
