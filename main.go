@@ -38,7 +38,6 @@ func init() {
 
 func main() {
 	rootCertPath := "/etc/ssl/docker"
-
 	if os.Getenv("DOCKER_CERT_PATH") != "" {
 		rootCertPath = os.Getenv("DOCKER_CERT_PATH")
 	}

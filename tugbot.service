@@ -43,9 +43,8 @@ ExecStartPre=-/usr/bin/docker rm tugbot-run
 
 ExecStart=/bin/bash -a -c 'docker run -d \
 --name tugbot-run \
---log-driver=json-file \
 -v /var/run/docker.sock:/var/run/docker.sock \
--e TUGBOT_WEBHOOKS=http://result-service-es.skydns.local:9200 \
+-e TUGBOT_WEBHOOKS=http://tugbot-rses.skydns.local:8081 \
 gaiadocker/tugbot:master'
 
 # Stop
