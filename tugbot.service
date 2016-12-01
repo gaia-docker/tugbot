@@ -48,7 +48,7 @@ ExecStart=/bin/bash -a -c 'docker run -d \
 gaiadocker/tugbot:master'
 
 # Stop
-ExecStop=/usr/bin/docker stop mr-burns
+ExecStop=/usr/bin/docker stop tugbot-run
 
 [Install]
 WantedBy=multi-user.target
