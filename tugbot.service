@@ -41,7 +41,7 @@ RestartSec=20s
 ExecStartPre=-/usr/bin/docker stop tugbot-run
 ExecStartPre=-/usr/bin/docker rm tugbot-run
 
-ExecStart=/bin/bash -a -c 'docker run -d \
+ExecStart=/bin/bash -a -c 'docker run \
 --name tugbot-run \
 -v /var/run/docker.sock:/var/run/docker.sock \
 -e TUGBOT_WEBHOOKS=http://tugbot-rses.skydns.local:8081 \
