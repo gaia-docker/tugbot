@@ -13,7 +13,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/gaia-docker/tugbot-common/event"
+	"github.com/gaia-docker/tugbot-common"
 	"github.com/gaia-docker/tugbot/actions"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
@@ -24,7 +24,7 @@ var (
 	names     []string
 	wgr       sync.WaitGroup
 	wgp       sync.WaitGroup
-	publisher event.Publisher
+	publisher common.Publisher
 )
 
 const (
@@ -124,7 +124,7 @@ func startMonitorEvents(c *cli.Context) {
 	client.StartMonitorEvents(runTestContainers)
 	webhooks := c.GlobalString("webhooks")
 	if webhooks != "" {
-		publisher = event.NewPublisher(strings.Split(webhooks, ";"))
+		publisher = common.NewPublisher(strings.Split(webhooks, ";"))
 		client.StartMonitorEvents(publishEvent)
 	}
 }
