@@ -30,7 +30,16 @@ func Run(client container.Client, names []string, e *dockerclient.Event) error {
 		}
 	}
 
-	return fmt.Errorf(strings.Join(ret, "\n"))
+	return getError(ret)
+}
+
+func getError(errors []string) error {
+	var ret error
+	if len(errors) > 0 {
+		ret = fmt.Errorf(strings.Join(errors, "\n"))
+	}
+
+	return ret
 }
 
 func containerFilter(names []string) container.Filter {
