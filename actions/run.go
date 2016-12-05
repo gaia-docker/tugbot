@@ -1,13 +1,12 @@
 package actions
 
 import (
-	"errors"
-
 	"fmt"
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
-	"strings"
 )
 
 // Run looks at Docker containers to see if any of the images
@@ -31,7 +30,7 @@ func Run(client container.Client, names []string, e *dockerclient.Event) error {
 		}
 	}
 
-	return errors.New(fmt.Errorf(strings.Join(ret, "\n")))
+	return fmt.Errorf(strings.Join(ret, "\n"))
 }
 
 func containerFilter(names []string) container.Filter {
