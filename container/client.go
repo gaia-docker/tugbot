@@ -26,7 +26,6 @@ type Client interface {
 // the Docker API.
 func NewClient(dockerHost string, tlsConfig *tls.Config, pullImages bool) Client {
 	docker, err := dockerclient.NewDockerClient(dockerHost, tlsConfig)
-
 	if err != nil {
 		log.Fatalf("Error instantiating Docker client: %s", err)
 	}

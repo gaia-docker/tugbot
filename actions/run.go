@@ -3,9 +3,11 @@ package actions
 import (
 	"errors"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
+	"strings"
 )
 
 // Run looks at Docker containers to see if any of the images
@@ -13,8 +15,7 @@ import (
 // For each test container it'll create and start a new container according
 // to tugbots' labels.
 func Run(client container.Client, names []string, e *dockerclient.Event) error {
-	log.Debugf("Docker event: %+v", e)
-	var cerr error
+	var ret []string
 	if !container.IsSwarmTask(e) && !container.IsCreatedByTugbot(e) {
 		candidates, err := client.ListContainers(containerFilter(names))
 		if err != nil {
@@ -24,17 +25,13 @@ func Run(client container.Client, names []string, e *dockerclient.Event) error {
 			if candidate.IsEventListener(e) {
 				if err := client.StartContainerFrom(candidate); err != nil {
 					log.Error(err)
-					// combine errors
-					if cerr == nil {
-						cerr = err
-					} else {
-						cerr = errors.New(cerr.Error() + err.Error())
-					}
+					ret = append(ret, err.Error())
 				}
 			}
 		}
 	}
-	return cerr
+
+	return errors.New(fmt.Errorf(strings.Join(ret, "\n")))
 }
 
 func containerFilter(names []string) container.Filter {
