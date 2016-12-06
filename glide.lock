@@ -1,16 +1,14 @@
-hash: 8292cd22eda0c976ef4e145f23ad734507addedb3c6512887d84c4fb81e4a07d
-updated: 2016-12-05T17:09:09.3831337+02:00
+hash: 184a12085e3d7beb3ab22b38eb13a635c19f7513ad7613986cc625e16d9dd531
+updated: 2016-12-06T13:18:28.3803615+02:00
 imports:
 - name: github.com/codegangsta/cli
-  version: a14d7d367bc02b1f57d88de97926727f2d936387
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/docker/go-units
   version: eb879ae3e2b84e2a142af415b679ddeda47ec71c
-- name: github.com/gaia-docker/tugbot-common
-  version: c4f50c8f7e07d5268c0e59f198c0a32ab9be278e
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
