@@ -4,7 +4,7 @@ distdir=.dist
 go_build() {
   rm -rf "${distdir}"
   mkdir "${distdir}"
-  glide install
+  go build
   CGO_ENABLED=0 go build -v -o ${distdir}/tugbot
 }
 
