@@ -130,6 +130,7 @@ func startMonitorEvents(c *cli.Context) {
 }
 
 func runTestContainers(e *dockerclient.Event, ec chan error, args ...interface{}) {
+	log.Debugf("Looking for test containers that should run on event: %+v", e)
 	wgr.Add(1)
 	if err := actions.Run(client, names, e); err != nil {
 		log.Error(err)
@@ -138,6 +139,7 @@ func runTestContainers(e *dockerclient.Event, ec chan error, args ...interface{}
 }
 
 func publishEvent(e *dockerclient.Event, ec chan error, args ...interface{}) {
+	log.Debugf("Publishing event: %+v", e)
 	wgp.Add(1)
 	publisher.Publish(e)
 	wgp.Done()
