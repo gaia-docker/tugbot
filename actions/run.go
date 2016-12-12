@@ -16,13 +16,14 @@ func Run(client container.Client, names []string, e *dockerclient.Event) error {
 	if !container.IsSwarmTask(e) && !container.IsCreatedByTugbot(e) {
 		candidates, err := client.ListContainers(containerFilter(names))
 		if err != nil {
-			return err
-		}
-		for _, candidate := range candidates {
-			if candidate.IsEventListener(e) {
-				if err := client.StartContainerFrom(candidate); err != nil {
-					log.Error(err)
-					ec.Append(err)
+			ec.Append(err)
+		} else {
+			for _, currCandidate := range candidates {
+				if currCandidate.IsEventListener(e) {
+					if err := client.StartContainerFrom(currCandidate); err != nil {
+						log.Error(err)
+						ec.Append(err)
+					}
 				}
 			}
 		}
@@ -32,14 +33,12 @@ func Run(client container.Client, names []string, e *dockerclient.Event) error {
 }
 
 func containerFilter(names []string) container.Filter {
-
 	return func(c container.Container) bool {
 		return nameFilter(names)(c) && c.IsTugbotCandidate()
 	}
 }
 
 func nameFilter(names []string) container.Filter {
-
 	if len(names) == 0 {
 		// all containers
 		return func(container.Container) bool {
