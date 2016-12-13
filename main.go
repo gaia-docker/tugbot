@@ -116,7 +116,7 @@ func before(c *cli.Context) error {
 func start(c *cli.Context) {
 	names = c.Args()
 	startMonitorEvents(c)
-	log.Info("Tugbot Started OK")
+	log.Infof("Tugbot Started. Debug: %v, Webhooks: %v", c.GlobalBool("debug"), c.GlobalBool("webhooks"))
 	waitForInterrupt()
 }
 
