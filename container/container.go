@@ -21,8 +21,6 @@ const (
 
 // Docker Event Filter
 const (
-	// Re2Prefix re2 regexp string prefix
-	Re2Prefix = "re2:"
 	// type filter: tugbot.event.docker.filter.type=container|image|daemon|network|volume|plugin
 	TypeFilter = "tugbot.event.docker.filter.type"
 	// action filter (depends on type), for 'container' type:
