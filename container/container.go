@@ -1,10 +1,12 @@
 package container
 
 import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/samalba/dockerclient"
+
 	"fmt"
 	"strings"
-
-	"github.com/samalba/dockerclient"
+	"time"
 )
 
 // Docker container labels
@@ -12,6 +14,7 @@ const (
 	TugbotService     = "tugbot.service"
 	TugbotTest        = "tugbot.test"
 	TugbotEventDocker = "tugbot.event.docker"
+	TugbotEventTimer  = "tugbot.event.timer"
 	TugbotCreatedFrom = "tugbot.created.from"
 	SwarmTaskID       = "com.docker.swarm.task.id"
 )
@@ -149,6 +152,24 @@ func (c Container) IsEventListener(e *dockerclient.Event) bool {
 	}
 
 	return ret
+}
+
+// GetEventListenerTimer returns interval duration between a test container run and true
+// if docker label exist and label value parsed into Duration, Otherwise false.
+func (c Container) GetEventListenerTimer() (time.Duration, bool) {
+	var ret time.Duration
+	val, ok := c.containerInfo.Config.Labels[TugbotEventTimer]
+	if ok {
+		interval, err := time.ParseDuration(val)
+		if err != nil {
+			log.Errorf("Failed to parse %s docker label: %s into golang Duration (%v)", TugbotEventTimer, val, err)
+			ok = false
+		} else {
+			ret = interval
+		}
+	}
+
+	return ret, ok
 }
 
 // Any links in the HostConfig need to be re-written before they can be

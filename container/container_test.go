@@ -221,3 +221,41 @@ func TestContainerIsCreatedByTugbot_False(t *testing.T) {
 
 	assert.False(t, c.IsCreatedByTugbot())
 }
+
+func TestGetEventListenerTimer(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{TugbotEventTimer: "7s"},
+			},
+		},
+	}
+	interval, ok := c.GetEventListenerTimer()
+
+	assert.True(t, ok)
+	assert.Equal(t, interval, time.Second*7)
+}
+
+func TestGetEventListenerTimer_LabelNotFound(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{},
+		},
+	}
+	_, ok := c.GetEventListenerTimer()
+
+	assert.False(t, ok)
+}
+
+func TestGetEventListenerTimer_FailedToParseInterval(t *testing.T) {
+	c := Container{
+		containerInfo: &dockerclient.ContainerInfo{
+			Config: &dockerclient.ContainerConfig{
+				Labels: map[string]string{TugbotEventTimer: "7"},
+			},
+		},
+	}
+	_, ok := c.GetEventListenerTimer()
+
+	assert.False(t, ok)
+}
