@@ -2,8 +2,8 @@ package: github.com/gaia-docker/tugbot
 import:
 - package: github.com/Sirupsen/logrus
 - package: github.com/codegangsta/cli
-- package: github.com/gaia-docker/tugbot-common
 - package: github.com/samalba/dockerclient
 - package: github.com/stretchr/testify
   subpackages:
   - mock
+- package: github.com/gaia-docker/tugbot-common

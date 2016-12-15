@@ -230,7 +230,7 @@ func TestGetEventListenerTimer(t *testing.T) {
 			},
 		},
 	}
-	interval, ok := c.GetEventListenerTimer()
+	interval, ok := c.GetEventListenerInterval()
 
 	assert.True(t, ok)
 	assert.Equal(t, interval, time.Second*7)
@@ -242,7 +242,7 @@ func TestGetEventListenerTimer_LabelNotFound(t *testing.T) {
 			Config: &dockerclient.ContainerConfig{},
 		},
 	}
-	_, ok := c.GetEventListenerTimer()
+	_, ok := c.GetEventListenerInterval()
 
 	assert.False(t, ok)
 }
@@ -255,7 +255,7 @@ func TestGetEventListenerTimer_FailedToParseInterval(t *testing.T) {
 			},
 		},
 	}
-	_, ok := c.GetEventListenerTimer()
+	_, ok := c.GetEventListenerInterval()
 
 	assert.False(t, ok)
 }

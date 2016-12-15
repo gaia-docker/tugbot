@@ -154,7 +154,7 @@ func (c Container) IsEventListener(e *dockerclient.Event) bool {
 
 // GetEventListenerTimer returns interval duration between a test container run and true
 // if docker label exist and label value parsed into Duration, Otherwise false.
-func (c Container) GetEventListenerTimer() (time.Duration, bool) {
+func (c Container) GetEventListenerInterval() (time.Duration, bool) {
 	var ret time.Duration
 	val, ok := c.containerInfo.Config.Labels[TugbotEventTimer]
 	if ok {
