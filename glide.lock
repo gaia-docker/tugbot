@@ -1,5 +1,5 @@
 hash: 2ba78547be93a4d6124f32a0611a81149c5d7d7182e015daed72abf702a91dc5
-updated: 2016-12-18T16:08:29.03193188+02:00
+updated: 2016-12-18T19:04:07.025317907+02:00
 imports:
 - name: github.com/codegangsta/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
@@ -10,7 +10,7 @@ imports:
 - name: github.com/docker/go-units
   version: e30f1e79f3cd72542f2026ceec18d3bd67ab859c
 - name: github.com/gaia-docker/tugbot-common
-  version: 87d9323c4adbe424da28aa5f2cbe838227ca7841
+  version: 6c2dc494c5f985c5c9a9b59525a53c98d4b5b5b9
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
