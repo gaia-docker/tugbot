@@ -10,15 +10,15 @@ import (
 )
 
 // RunTickerTestContainers on a clock intervals runs test containers that should run recurring.
-func RunTickerTestContainers(ctx context.Context, client container.Client) {
+func RunTickerTestContainers(ctx context.Context, client container.Client, interval time.Duration) {
 	manager := common.NewTaskManager()
-	ticker := time.NewTicker(time.Second * 18)
+	ticker := time.NewTicker(interval)
 	for {
 		runNewTasks(manager, client)
 		select {
 		case <-ctx.Done():
 			ticker.Stop()
-			manager.StopTasks()
+			manager.StopAllTasks()
 			log.Info("Test Containers' Ticker Stopped.")
 
 			return
@@ -35,18 +35,24 @@ func runNewTasks(manager common.TaskManager, client container.Client) {
 	if err != nil {
 		log.Errorf("Failed to get list test containers candidates for timer event (%v)", err)
 	} else {
+		var tasks []string
 		for _, currCandidate := range candidates {
 			interval, ok := currCandidate.GetEventListenerInterval()
 			if ok {
-				manager.RunNewRecurringTask(common.Task{
-					ID:   currCandidate.ID(),
+				currTaskId := currCandidate.ID()
+				currTask := common.Task{
+					ID:   currTaskId,
 					Name: currCandidate.Name(),
 					Job: func(param interface{}) error {
 						return client.StartContainerFrom(param.(container.Container))
 					},
 					JobParam: currCandidate,
-					Interval: interval})
+					Interval: interval}
+				if ok := manager.RunNewRecurringTask(currTask); ok {
+					tasks = append(tasks, currTaskId)
+				}
 			}
 		}
+		manager.Refresh(tasks)
 	}
 }
