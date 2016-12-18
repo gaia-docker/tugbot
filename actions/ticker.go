@@ -14,26 +14,7 @@ func RunTickerTestContainers(ctx context.Context, client container.Client) {
 	manager := common.NewTaskManager()
 	ticker := time.NewTicker(time.Second * 18)
 	for {
-		candidates, err := client.ListContainers(func(c container.Container) bool {
-			return c.IsTugbotCandidate()
-		})
-		if err != nil {
-			log.Errorf("Failed to get list test containers candidates for timer event (%v)", err)
-		} else {
-			for _, currCandidate := range candidates {
-				interval, ok := currCandidate.GetEventListenerInterval()
-				if ok {
-					manager.RunNewRecurringTask(common.Task{
-						ID:   currCandidate.ID(),
-						Name: currCandidate.Name(),
-						Job: func(param interface{}) error {
-							return client.StartContainerFrom(param.(container.Container))
-						},
-						JobParam: currCandidate,
-						Interval: interval})
-				}
-			}
-		}
+		runNewTasks(manager, client)
 		select {
 		case <-ctx.Done():
 			ticker.Stop()
@@ -43,6 +24,29 @@ func RunTickerTestContainers(ctx context.Context, client container.Client) {
 			return
 		case <-ticker.C:
 			break
+		}
+	}
+}
+
+func runNewTasks(manager common.TaskManager, client container.Client) {
+	candidates, err := client.ListContainers(func(c container.Container) bool {
+		return c.IsTugbotCandidate()
+	})
+	if err != nil {
+		log.Errorf("Failed to get list test containers candidates for timer event (%v)", err)
+	} else {
+		for _, currCandidate := range candidates {
+			interval, ok := currCandidate.GetEventListenerInterval()
+			if ok {
+				manager.RunNewRecurringTask(common.Task{
+					ID:   currCandidate.ID(),
+					Name: currCandidate.Name(),
+					Job: func(param interface{}) error {
+						return client.StartContainerFrom(param.(container.Container))
+					},
+					JobParam: currCandidate,
+					Interval: interval})
+			}
 		}
 	}
 }
