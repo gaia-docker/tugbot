@@ -8,15 +8,47 @@ import (
 	"github.com/stretchr/testify/mock"
 	"k8s.io/kubernetes/staging/src/k8s.io/client-go/1.4/_vendor/golang.org/x/net/context"
 
+	"errors"
 	"sync"
 	"testing"
 )
 
+func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
+	touch := false
+	var locker sync.Mutex
+	var wg1, wg2 sync.WaitGroup
+	wg1.Add(1)
+	wg2.Add(1)
+	client := mockclient.NewMockClient()
+	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
+		Run(func(args mock.Arguments) {
+			locker.Lock()
+			if !touch {
+				touch = true
+				wg1.Done()
+			}
+			locker.Unlock()
+		}).Return([]container.Container{}, errors.New("Expected :)"))
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		RunTickerTestContainers(ctx, client)
+		wg2.Done()
+	}()
+	wg1.Wait()
+	cancel()
+	wg2.Wait()
+
+	assert.True(t, touch)
+	client.AssertExpectations(t)
+
+}
+
 func TestRunTickerTestContainers(t *testing.T) {
 	touch := false
 	var locker sync.Mutex
-	var wg sync.WaitGroup
-	wg.Add(1)
+	var wg1, wg2 sync.WaitGroup
+	wg1.Add(1)
+	wg2.Add(1)
 	cc := &dockerclient.ContainerConfig{
 		Labels: map[string]string{
 			container.TugbotTest:       "true",
@@ -40,14 +72,19 @@ func TestRunTickerTestContainers(t *testing.T) {
 			locker.Lock()
 			if !touch {
 				touch = true
-				wg.Done()
+				wg1.Done()
 			}
 			locker.Unlock()
 		}).Return(nil)
 	ctx, cancel := context.WithCancel(context.Background())
-	go RunTickerTestContainers(ctx, client)
-	wg.Wait()
+	go func() {
+		RunTickerTestContainers(ctx, client)
+		wg2.Done()
+	}()
+	wg1.Wait()
 	cancel()
+	wg2.Wait()
 
+	assert.True(t, touch)
 	client.AssertExpectations(t)
 }

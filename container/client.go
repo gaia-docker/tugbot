@@ -38,10 +38,8 @@ type dockerClient struct {
 }
 
 func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
-	cs := []Container{}
-
-	log.Debug("Retrieving containers")
-
+	log.Debug("Retrieving containers...")
+	ret := []Container{}
 	containers, err := client.api.ListContainers(true, false, "")
 	if err != nil {
 		return nil, err
@@ -53,11 +51,11 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 			continue
 		}
 		if fn(*c) {
-			cs = append(cs, *c)
+			ret = append(ret, *c)
 		}
 	}
 
-	return cs, nil
+	return ret, nil
 }
 
 func (client dockerClient) StartContainerFrom(c Container) error {
