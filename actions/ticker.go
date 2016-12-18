@@ -48,8 +48,9 @@ func runNewTasks(manager common.TaskManager, client container.Client) {
 					},
 					JobParam: currCandidate,
 					Interval: interval}
+				tasks = append(tasks, currTaskId)
 				if ok := manager.RunNewRecurringTask(currTask); ok {
-					tasks = append(tasks, currTaskId)
+					log.Infof("Ticker starting new recuring task... (Container ID: %s, Name: %s, Interval: %s)", currTaskId, currTask.Name, currTask.Interval)
 				}
 			}
 		}
