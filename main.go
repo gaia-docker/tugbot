@@ -1,30 +1,34 @@
 package main // import "github.com/gaia-docker/tugbot"
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"os/signal"
-	"strings"
-	"sync"
-	"syscall"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 	"github.com/gaia-docker/tugbot-common"
 	"github.com/gaia-docker/tugbot/actions"
 	"github.com/gaia-docker/tugbot/container"
 	"github.com/samalba/dockerclient"
+
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"golang.org/x/net/context"
+	"io/ioutil"
+	"os"
+	"os/signal"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
 )
 
 var (
-	client    container.Client
-	names     []string
-	wgr       sync.WaitGroup
-	wgp       sync.WaitGroup
-	publisher common.Publisher
+	client       container.Client
+	names        []string
+	publisher    common.Publisher
+	wgr          sync.WaitGroup
+	wgp          sync.WaitGroup
+	wgt          sync.WaitGroup
+	tickerCancel context.CancelFunc
 )
 
 const (
@@ -107,7 +111,6 @@ func before(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
 	client = container.NewClient(c.GlobalString("host"), tls, !c.GlobalBool("no-pull"))
 
 	return nil
@@ -116,6 +119,7 @@ func before(c *cli.Context) error {
 func start(c *cli.Context) {
 	names = c.Args()
 	startMonitorEvents(c)
+	startTicker()
 	log.Infof("Tugbot Started. Debug: %v, Webhooks: %v", c.GlobalBool("debug"), c.GlobalBool("webhooks"))
 	waitForInterrupt()
 }
@@ -129,8 +133,17 @@ func startMonitorEvents(c *cli.Context) {
 	}
 }
 
+func startTicker() {
+	wgt.Add(1)
+	var ctx context.Context
+	ctx, tickerCancel = context.WithCancel(context.Background())
+	go func() {
+		actions.RunTickerTestContainers(ctx, client, time.Second*18)
+		wgt.Done()
+	}()
+}
 func runTestContainers(e *dockerclient.Event, ec chan error, args ...interface{}) {
-	log.Infof("Looking for test containers that should run on event: %+v", e)
+	log.Debugf("Looking for test containers that should run on event: %+v", e)
 	wgr.Add(1)
 	if err := actions.Run(client, names, e); err != nil {
 		log.Error(err)
@@ -139,8 +152,7 @@ func runTestContainers(e *dockerclient.Event, ec chan error, args ...interface{}
 }
 
 func publishEvent(e *dockerclient.Event, ec chan error, args ...interface{}) {
-	//log.Debugf("Publishing event: %+v", e)
-	log.Infof("Publishing event: %+v", e)
+	log.Debugf("Publishing event: %+v", e)
 	wgp.Add(1)
 	publisher.Publish(e)
 	wgp.Done()
@@ -151,9 +163,13 @@ func waitForInterrupt() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
 	<-c
-	log.Debug("Stop monitoring events ...")
 	wgr.Wait()
+	log.Info("Stoping monitor events...")
 	client.StopAllMonitorEvents()
+	wgp.Wait()
+	log.Info("Stoping ticker...")
+	tickerCancel()
+	wgt.Wait()
 	log.Debug("Graceful exit :-)")
 	os.Exit(1)
 }
