@@ -41,7 +41,8 @@ All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflic
 
 - `tugbot.test` - this is a *test container* discovery label; without it, **Tugbot** will not recognize this container as a *test container*
 - `tugbot.results.dir` - directory, where *test container* reports test results; default to `/var/tests/results`
-- `tugbot.event.docker` - marker label (no value is required) to subscribe **test container** to Docker events
+- `tugbot.event.timer` - subscribe *test container* to recurrent time interval between runs; use time suffix ("s", "m", "h")
+- `tugbot.event.docker` - marker label (no value is required) to subscribe *test container* to Docker events
 - `tugbot.event.docker.filter.type` - Docker event type filter; can be one of `container, image, daemon, network, plugin, volume`
 - `tugbot.event.docker.filter.action` - Docker event action (event type specific); multiple actions can be defined (comma separated)
 - - `container` event type actions: `attach, commit, copy, create, destroy, detach, die, exec_create, exec_detach, exec_start, export, health_status, kill, oom, pause, rename, resize, restart, start, stop, top, unpause, update`
@@ -76,7 +77,19 @@ LABEL tugbot.event.docker.filter.action=start,stop
 LABEL tugbot.event.docker.filter.container=re2:^hp
 ...
 ```
+#####Example (Dockerfile):
+```
+...
+# this is Tugbot Test Container
+LABEL tugbot.test
 
+# test results are saved into `/var/tests/results`
+LABEL tugbot.results.dir=/var/tests/results
+
+# recurrent run container and wait 10 seconds 
+LABEL tugbot.event.timer=10s
+...
+```
 ## Tugbot Run Service
 
 ```
@@ -89,7 +102,7 @@ USAGE:
    tugbot [global options] command [command options] test containers: name, list of names, or none (for all test containers)
 
 VERSION:
-   v0.3.0
+   v0.4.0
 
 COMMANDS:
      help, h  Shows a list of commands or help for one command
