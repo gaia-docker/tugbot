@@ -20,6 +20,7 @@ type Client interface {
 	StartContainerFrom(Container) error
 	StartMonitorEvents(dockerclient.Callback)
 	StopAllMonitorEvents()
+	Inspect(containerID string) (*Container, error)
 }
 
 // NewClient returns a new Client instance which can be used to interact with
@@ -46,7 +47,7 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 	}
 
 	for _, currContainer := range containers {
-		c, err := client.toContainer(currContainer.Id)
+		c, err := client.Inspect(currContainer.Id)
 		if err != nil {
 			continue
 		}
@@ -89,7 +90,7 @@ func (client dockerClient) StopAllMonitorEvents() {
 	client.api.StopAllMonitorEvents()
 }
 
-func (client dockerClient) toContainer(containerID string) (*Container, error) {
+func (client dockerClient) Inspect(containerID string) (*Container, error) {
 	containerInfo, err := client.api.InspectContainer(containerID)
 	if err != nil {
 		log.Errorf("Failed retrieving container info (%s). Error: %+v", containerID, err)
