@@ -41,13 +41,11 @@ func runNewTasks(manager common.TaskManager, client container.Client) {
 			if ok {
 				currTaskId := currCandidate.ID()
 				currTask := common.Task{
-					ID:   currTaskId,
-					Name: currCandidate.Name(),
-					Job: func(param interface{}) error {
-						return client.StartContainerFrom(param.(container.Container))
-					},
-					JobParam: currCandidate,
-					Interval: interval}
+					ID:        currTaskId,
+					Name:      currCandidate.Name(),
+					Job:       startContainerFrom,
+					JobParams: []interface{}{client, currCandidate},
+					Interval:  interval}
 				tasks = append(tasks, currTaskId)
 				if ok := manager.RunNewRecurringTask(currTask); ok {
 					log.Infof("Ticker starting new recuring task... (Container ID: %s, Name: %s, Interval: %s)", currTaskId, currTask.Name, currTask.Interval)
@@ -56,4 +54,14 @@ func runNewTasks(manager common.TaskManager, client container.Client) {
 		}
 		manager.Refresh(tasks)
 	}
+}
+
+func startContainerFrom(params []interface{}) error {
+	client := params[0].(container.Client)
+	c := params[1].(container.Container)
+	if _, err := client.Inspect(c.ID()); err != nil {
+		return err
+	}
+
+	return client.StartContainerFrom(c)
 }

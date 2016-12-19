@@ -68,6 +68,10 @@ func TestRunTickerTestContainers(t *testing.T) {
 	)
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
+	client.On("Inspect", mock.AnythingOfType("string")).
+		Run(func(args mock.Arguments) {
+			assert.Equal(t, c.ID(), args.Get(0).(string))
+		}).Return(&c, nil).Once()
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
@@ -122,18 +126,30 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 	)
 
 	client := mockclient.NewMockClient()
+
+	// Iteration 1 - c1
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Return([]container.Container{c1}, nil).Once()
+	client.On("Inspect", mock.AnythingOfType("string")).
+		Run(func(args mock.Arguments) {
+			assert.Equal(t, c1.ID(), args.Get(0).(string))
+		}).Return(&c1, nil).Once()
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			name := args.Get(0).(container.Container).Name()
 			log.Info("Running container ", name)
 			assert.Equal(t, c1.Name(), name)
 		}).Return(nil).Once()
+
+	// Iteration 2 - c2
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Run(func(args mock.Arguments) {
 			touchListContainers = true
 		}).Return([]container.Container{c2}, nil)
+	client.On("Inspect", mock.AnythingOfType("string")).
+		Run(func(args mock.Arguments) {
+			assert.Equal(t, c2.ID(), args.Get(0).(string))
+		}).Return(&c2, nil).Once()
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			name := args.Get(0).(container.Container).Name()
@@ -142,6 +158,7 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 			assert.Equal(t, c2.Name(), name)
 			wg1.Done()
 		}).Return(nil)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Nanosecond*1)
