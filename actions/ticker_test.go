@@ -67,7 +67,7 @@ func TestRunTickerTestContainers(t *testing.T) {
 		nil,
 	)
 	client := mockclient.NewMockClient()
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil)
+	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil).Once()
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
@@ -81,7 +81,7 @@ func TestRunTickerTestContainers(t *testing.T) {
 				wg1.Done()
 			}
 			locker.Unlock()
-		}).Return(nil)
+		}).Return(nil).Once()
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Second*10)
@@ -96,7 +96,6 @@ func TestRunTickerTestContainers(t *testing.T) {
 }
 
 func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *testing.T) {
-	touchListContainers, touchStartContainerFrom := false, false
 	var wg1, wg2 sync.WaitGroup
 	wg1.Add(1)
 	wg2.Add(1)
@@ -143,9 +142,7 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 
 	// Iteration 2 - c2
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
-		Run(func(args mock.Arguments) {
-			touchListContainers = true
-		}).Return([]container.Container{c2}, nil).Once()
+		Return([]container.Container{c2}, nil).Once()
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c2.ID(), args.Get(0).(string))
@@ -154,10 +151,9 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 		Run(func(args mock.Arguments) {
 			name := args.Get(0).(container.Container).Name()
 			log.Info("Running container ", name)
-			touchStartContainerFrom = true
 			assert.Equal(t, c2.Name(), name)
 			wg1.Done()
-		}).Return(nil)
+		}).Return(nil).Once()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -170,8 +166,6 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 	log.Info("Wating for quiting ticker")
 	wg2.Wait()
 
-	assert.True(t, touchListContainers)
-	assert.True(t, touchStartContainerFrom)
 	client.AssertExpectations(t)
 }
 
