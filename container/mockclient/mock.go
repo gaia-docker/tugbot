@@ -40,5 +40,5 @@ func (m *MockClient) IsCreatedByTugbot(e *dockerclient.Event) bool {
 
 func (m *MockClient) Inspect(containerID string) (*container.Container, error) {
 	args := m.Called(containerID)
-	return args.Get(0).(bool), args.Error(1)
+	return args.Get(0).(*container.Container), args.Error(1)
 }
