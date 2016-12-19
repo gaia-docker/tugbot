@@ -91,7 +91,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "webhooks",
 			Usage:  "list of urls sperated by ';'",
-			Value:  "http://result-service:8081/events",
+			Value:  "",
 			EnvVar: "TUGBOT_WEBHOOKS",
 		},
 	}
