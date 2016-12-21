@@ -15,25 +15,20 @@ import (
 	"time"
 )
 
+const containerFilterType string = "container.Filter"
+
 func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
-	touch := false
-	var locker sync.Mutex
 	var wg1, wg2 sync.WaitGroup
 	wg1.Add(1)
 	wg2.Add(1)
 	ctx, cancel := context.WithCancel(context.Background())
 	client := mockclient.NewMockClient()
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
 		Run(func(args mock.Arguments) {
-			locker.Lock()
-			if !touch {
-				touch = true
-				wg1.Done()
-			}
-			locker.Unlock()
+			wg1.Done()
 			// stop ticker - do not run next iteration
 			cancel()
-		}).Return([]container.Container{}, errors.New("Expected :)"))
+		}).Return([]container.Container{}, errors.New("Expected :)")).Once()
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Second*10)
 		wg2.Done()
@@ -41,9 +36,7 @@ func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
 	wg1.Wait()
 	wg2.Wait()
 
-	assert.True(t, touch)
 	client.AssertExpectations(t)
-
 }
 
 func TestRunTickerTestContainers(t *testing.T) {
@@ -68,7 +61,11 @@ func TestRunTickerTestContainers(t *testing.T) {
 		nil,
 	)
 	client := mockclient.NewMockClient()
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).Return([]container.Container{c}, nil).Once()
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
+			assert.True(t, args[0].(container.Filter)(c))
+		}).
+		Return([]container.Container{c}, nil).Once()
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
@@ -129,7 +126,10 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 	client := mockclient.NewMockClient()
 
 	// Iteration 1 - c1
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
+			assert.True(t, args[0].(container.Filter)(c1))
+		}).
 		Return([]container.Container{c1}, nil).Once()
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
@@ -143,7 +143,10 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 		}).Return(nil).Once()
 
 	// Iteration 2 - c2
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
+			assert.True(t, args[0].(container.Filter)(c2))
+		}).
 		Return([]container.Container{c2}, nil).Once()
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
@@ -192,7 +195,10 @@ func TestRunTickerTestContainers_FailedToFindBasicContainer(t *testing.T) {
 	)
 
 	client := mockclient.NewMockClient()
-	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
+			assert.True(t, args[0].(container.Filter)(c))
+		}).
 		Return([]container.Container{c}, nil).Once()
 	ctx, cancel := context.WithCancel(context.Background())
 	// failed to find basic container (to start from it a new container)
