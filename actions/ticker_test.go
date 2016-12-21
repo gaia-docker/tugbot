@@ -39,7 +39,6 @@ func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
 		wg2.Done()
 	}()
 	wg1.Wait()
-	cancel()
 	wg2.Wait()
 
 	assert.True(t, touch)
@@ -92,7 +91,6 @@ func TestRunTickerTestContainers(t *testing.T) {
 		wg2.Done()
 	}()
 	wg1.Wait()
-	cancel()
 	wg2.Wait()
 
 	assert.True(t, touch)
@@ -211,7 +209,6 @@ func TestRunTickerTestContainers_FailedToFindBasicContainer(t *testing.T) {
 	}()
 	log.Info("Wating for inpect of ", c.Name())
 	wg1.Wait()
-	cancel()
 	log.Info("Wating for quiting ticker")
 	wg2.Wait()
 
