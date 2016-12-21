@@ -37,57 +37,57 @@ The idea behind **Continuous Testing** is to execute tests, that require access 
 
 ### Tugbot Labels
 
-All **Tugbot** labels must be prefixed with `tugbot.` to avoid potential conflict with other labels.
+All **Tugbot** labels must be prefixed with `tugbot-` to avoid potential conflict with other labels.
 
-- `tugbot.test` - this is a *test container* discovery label; without it, **Tugbot** will not recognize this container as a *test container*
-- `tugbot.results.dir` - directory, where *test container* reports test results; default to `/var/tests/results`
-- `tugbot.event.timer` - subscribe *test container* to recurrent time interval between runs; use time suffix ("s", "m", "h")
-- `tugbot.event.docker` - marker label (no value is required) to subscribe *test container* to Docker events
-- `tugbot.event.docker.filter.type` - Docker event type filter; can be one of `container, image, daemon, network, plugin, volume`
-- `tugbot.event.docker.filter.action` - Docker event action (event type specific); multiple actions can be defined (comma separated)
+- `tugbot-test` - this is a *test container* discovery label; without it, **Tugbot** will not recognize this container as a *test container*
+- `tugbot-results-dir` - directory, where *test container* reports test results; default to `/var/tests/results`
+- `tugbot-event-timer` - subscribe *test container* to recurrent time interval between runs; use time suffix ("s", "m", "h")
+- `tugbot-event-docker` - marker label (no value is required) to subscribe *test container* to Docker events
+- `tugbot-event-docker-filter-type` - Docker event type filter; can be one of `container, image, daemon, network, plugin, volume`
+- `tugbot-event-docker-filter-action` - Docker event action (event type specific); multiple actions can be defined (comma separated)
 - - `container` event type actions: `attach, commit, copy, create, destroy, detach, die, exec_create, exec_detach, exec_start, export, health_status, kill, oom, pause, rename, resize, restart, start, stop, top, unpause, update`
 - - `image` event type actions: `delete, import, load, pull, push, save, tag, untag`
 - - `plugin` event type actions: `install, enable, disable, remove`
 - - `volume` event type actions: `create, mount, unmount, destroy`
 - - `network` event type actions: `create, connect, disconnect, destroy`
 - - `daemon` event type action: `reload`
-- `tugbot.event.docker.filter.container` - container name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this label to trigger test execution for events coming from these containers.
-- `tugbot.event.docker.filter.image` - image name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this filter to limit events coming from Docker images or containers created from these images
-- `tugbot.event.docker.filter.label` - filter events coming from resource (container, image, volume, network), that has specified labels (and optionally values); this can be comma separated list of `key=value` pairs.
+- `tugbot-event-docker-filter-container` - container name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this label to trigger test execution for events coming from these containers.
+- `tugbot-event-docker-filter-image` - image name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this filter to limit events coming from Docker images or containers created from these images
+- `tugbot-event-docker-filter-label` - filter events coming from resource (container, image, volume, network), that has specified labels (and optionally values); this can be comma separated list of `key=value` pairs.
 
 #####Example (Dockerfile):
 ```
 ...
 # this is Tugbot Test Container
-LABEL tugbot.test
+LABEL tugbot-test
 
 # test results are saved into `/var/tests/results`
-LABEL tugbot.results.dir=/var/tests/results
+LABEL tugbot-results-dir=/var/tests/results
 
 # subscribe to Docker events
-LABEL tugbot.event.docker
+LABEL tugbot-event-docker
 
 # filter by event type == `container`
-LABEL tugbot.event.docker.filter.type=container
+LABEL tugbot-event-docker-filter-type=container
 
 # filter by event action: either `start` or `stop`
-LABEL tugbot.event.docker.filter.action=start,stop
+LABEL tugbot-event-docker-filter-action=start,stop
 
 # subscribe to events from all containers with name prefix `hp...`
-LABEL tugbot.event.docker.filter.container=re2:^hp
+LABEL tugbot-event-docker-filter-container=re2:^hp
 ...
 ```
 #####Example (Dockerfile):
 ```
 ...
 # this is Tugbot Test Container
-LABEL tugbot.test
+LABEL tugbot-test
 
 # test results are saved into `/var/tests/results`
-LABEL tugbot.results.dir=/var/tests/results
+LABEL tugbot-results-dir=/var/tests/results
 
 # recurrent run container and wait 10 seconds 
-LABEL tugbot.event.timer=10s
+LABEL tugbot-event-timer=10s
 ...
 ```
 ## Tugbot Run Service
