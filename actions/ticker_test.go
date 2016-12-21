@@ -94,10 +94,10 @@ func TestRunTickerTestContainers(t *testing.T) {
 	client.AssertExpectations(t)
 }
 
-func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *testing.T) {
+func TestRunTickerTestContainers_Iteration2ContainsDifferentListOfContainers(t *testing.T) {
 	var wg1, wg2 sync.WaitGroup
 	wg1.Add(1)
-	wg2.Add(1)
+	wg2.Add(2)
 	cc := &dockerclient.ContainerConfig{
 		Labels: map[string]string{
 			container.TugbotTest:       "true",
@@ -152,16 +152,24 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c2.ID(), args.Get(0).(string))
 		}).Return(&c2, nil).Once()
-	ctx, cancel := context.WithCancel(context.Background())
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			name := args.Get(0).(container.Container).Name()
 			log.Info("Running container ", name)
 			assert.Equal(t, c2.Name(), name)
 			wg1.Done()
+		}).Return(nil).Once()
+
+	// Iteration 3 - no containers - quit ticker
+	ctx, cancel := context.WithCancel(context.Background())
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
+			wg2.Done()
 			// stop ticker - do not run next iteration
 			cancel()
-		}).Return(nil).Once()
+		}).
+		Return([]container.Container{}, nil).Once()
+
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Nanosecond*1)
 		wg2.Done()
