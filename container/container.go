@@ -93,9 +93,9 @@ func (c Container) IsTugbot() bool {
 // it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
 func (c Container) IsTugbotCandidate() bool {
 	ret := false
-	log.Info("Checking container %s for being candidate",c.containerInfo.Name)
+	log.Info("Checking container %v for being candidate ",c.containerInfo.Name)
 	val, ok := c.containerInfo.Config.Labels[TugbotTest]
-	log.Info("Val is %s", val)
+	log.Info("Val is %v, data is %v", val, c.containerInfo.Config.Labels[TugbotTest])
 	if ok && val == "true" {
 		if !c.IsCreatedByTugbot() {
 			ret = c.containerInfo.State.StateString() == "exited"
