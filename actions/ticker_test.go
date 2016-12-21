@@ -21,6 +21,7 @@ func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
 	var wg1, wg2 sync.WaitGroup
 	wg1.Add(1)
 	wg2.Add(1)
+	ctx, cancel := context.WithCancel(context.Background())
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Run(func(args mock.Arguments) {
@@ -30,8 +31,9 @@ func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
 				wg1.Done()
 			}
 			locker.Unlock()
+			// stop ticker - do not run next iteration
+			cancel()
 		}).Return([]container.Container{}, errors.New("Expected :)"))
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Second*10)
 		wg2.Done()
@@ -72,6 +74,7 @@ func TestRunTickerTestContainers(t *testing.T) {
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
 		}).Return(&c, nil).Once()
+	ctx, cancel := context.WithCancel(context.Background())
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
@@ -81,8 +84,9 @@ func TestRunTickerTestContainers(t *testing.T) {
 				wg1.Done()
 			}
 			locker.Unlock()
+			// stop ticker - do not run next iteration
+			cancel()
 		}).Return(nil).Once()
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Second*10)
 		wg2.Done()
@@ -147,22 +151,22 @@ func TestRunTickerTestContainers_Iteration2ContainsDifferentListContainers(t *te
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c2.ID(), args.Get(0).(string))
 		}).Return(&c2, nil).Once()
+	ctx, cancel := context.WithCancel(context.Background())
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			name := args.Get(0).(container.Container).Name()
 			log.Info("Running container ", name)
 			assert.Equal(t, c2.Name(), name)
 			wg1.Done()
+			// stop ticker - do not run next iteration
+			cancel()
 		}).Return(nil).Once()
-
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Nanosecond*1)
 		wg2.Done()
 	}()
 	log.Info("Wating for finish running container ", c2.Name())
 	wg1.Wait()
-	cancel()
 	log.Info("Wating for quiting ticker")
 	wg2.Wait()
 
@@ -192,13 +196,15 @@ func TestRunTickerTestContainers_FailedToFindBasicContainer(t *testing.T) {
 	client := mockclient.NewMockClient()
 	client.On("ListContainers", mock.AnythingOfType("container.Filter")).
 		Return([]container.Container{c}, nil).Once()
+	ctx, cancel := context.WithCancel(context.Background())
 	// failed to find basic container (to start from it a new container)
 	client.On("Inspect", mock.AnythingOfType("string")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
 			wg1.Done()
+			// stop ticker - do not run next iteration
+			cancel()
 		}).Return(&container.Container{}, errors.New("Expected :-)")).Once()
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		RunTickerTestContainers(ctx, client, time.Second*10)
 		wg2.Done()
