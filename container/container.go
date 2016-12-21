@@ -11,28 +11,28 @@ import (
 
 // Docker container labels
 const (
-	TugbotService     = "tugbot.service"
-	TugbotTest        = "tugbot.test"
-	TugbotEventDocker = "tugbot.event.docker"
-	TugbotEventTimer  = "tugbot.event.timer"
-	TugbotCreatedFrom = "tugbot.created.from"
+	TugbotService     = "tugbot-service"
+	TugbotTest        = "tugbot-test"
+	TugbotEventDocker = "tugbot-event-docker"
+	TugbotEventTimer  = "tugbot-event-timer"
+	TugbotCreatedFrom = "tugbot-created-from"
 	SwarmTaskID       = "com.docker.swarm.task.id"
 )
 
 // Docker Event Filter
 const (
-	// type filter: tugbot.event.docker.filter.type=container|image|daemon|network|volume|plugin
-	TypeFilter = "tugbot.event.docker.filter.type"
+	// type filter: tugbot-event-docker-filter-type=container|image|daemon|network|volume|plugin
+	TypeFilter = "tugbot-event-docker-filter-type"
 	// action filter (depends on type), for 'container' type:
 	//  - attach, commit, copy, create, destroy, detach, die, exec_create, exec_detach, exec_start, export,
 	//  - health_status, kill, oom, pause, rename, resize, restart, start, stop, top, unpause, update
-	ActionFilter = "tugbot.event.docker.filter.action"
+	ActionFilter = "tugbot-event-docker-filter-action"
 	// container filter: use name, comma separated name list or RE2 regexp
-	ContainerFilter = "tugbot.event.docker.filter.container"
+	ContainerFilter = "tugbot-event-docker-filter-container"
 	// image filter: use name, comma separated name list or RE2 regexp
-	ImageFilter = "tugbot.event.docker.filter.image"
+	ImageFilter = "tugbot-event-docker-filter-image"
 	// label filter: use key=value comma separated pairs
-	LabelFilter = "tugbot.event.docker.filter.label"
+	LabelFilter = "tugbot-event-docker-filter-label"
 )
 
 // NewContainer returns a new Container instance instantiated with the
@@ -89,7 +89,7 @@ func (c Container) IsTugbot() bool {
 }
 
 // IsTugbotCandidate returns whether or not a container is a candidate to run by tugbot.
-// A candidate container is identified by the presence of "tugbot.test",
+// A candidate container is identified by the presence of "tugbot-test",
 // it doesn't contain "tugbot.created.from" in the container metadata and it state is "Exited".
 func (c Container) IsTugbotCandidate() bool {
 	ret := false
@@ -114,7 +114,7 @@ func (c Container) IsCreatedByTugbot() bool {
 func (c Container) IsEventListener(e *dockerclient.Event) bool {
 	ret := false
 	if e != nil {
-		// check if container is subscribed to Docker events, i.e. 'tugbot.event.docker' label exists
+		// check if container is subscribed to Docker events, i.e. 'tugbot-event-docker' label exists
 		_, ret = c.containerInfo.Config.Labels[TugbotEventDocker]
 		if ret {
 			// filter by event type

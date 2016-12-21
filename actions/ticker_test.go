@@ -7,7 +7,7 @@ import (
 	"github.com/samalba/dockerclient"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/kubernetes/staging/src/k8s.io/client-go/1.4/_vendor/golang.org/x/net/context"
+	"golang.org/x/net/context"
 
 	"errors"
 	"sync"

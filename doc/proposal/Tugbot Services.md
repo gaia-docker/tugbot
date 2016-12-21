@@ -26,15 +26,15 @@ The Docker image for any **Tugbot** service should be based on Alpine Linux and 
 ## Test Container
 
 *Test container* is a regular Docker container. We use Docker `LABEL` to discover *test container* and **Tugbot** related test metadata. These labels can be part of image or can be specified at runtime, using `--label` `docker run` option.
-**Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot.event.*` labels).
+**Tugbot** will trigger a sequential *test container* execution on *event* (see `Tugbot-event.*` labels).
 
 ### Tugbot labels
 All **Tugbot** labels must be prefixed with `Tugbot.` to avoid potential conflict with other labels.
 
-- `tugbot.test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
-- `tugbot.results` - directory, where *test container* reports test results; default to `/var/tests/results`
-- `tugbot.event.timer` - recurrent time interval; can use time suffix ("s", "m", "h") for readability
-- `tugbot.event.docker` - list of comma separated Docker events
+- `tugbot-test` - this is a *test container* marker label; without it, **Tugbot** will not recognize this container a a *test container*
+- `tugbot-results` - directory, where *test container* reports test results; default to `/var/tests/results`
+- `tugbot-event-timer` - recurrent time interval; can use time suffix ("s", "m", "h") for readability
+- `tugbot-event-docker` - list of comma separated Docker events
 
 ## Tugbot Collect Service
 
