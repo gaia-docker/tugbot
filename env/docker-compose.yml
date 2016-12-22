@@ -1,0 +1,29 @@
+version: '2'
+services:
+  elasticsearch:
+    build: elasticsearch/
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+  tugbot-result-es:
+    image: gaiadocker/tugbot-result-service-es
+    ports:
+      - "8080:8080"
+    links:
+      - elasticsearch
+  tugbot-run:
+    image: gaiadocker/tugbot
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TUGBOT_WEBHOOKS: "http://elasticsearch:9200"
+    links:
+      - tugbot-result-es
+  tugbot-collect:
+    image: gaiadocker/tugbot-collect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    links:
+      - tugbot-result-es
