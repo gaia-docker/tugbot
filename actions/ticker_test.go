@@ -40,8 +40,6 @@ func TestRunTickerTestContainers_FailedToGetListContainers(t *testing.T) {
 }
 
 func TestRunTickerTestContainers(t *testing.T) {
-	touch := false
-	var locker sync.Mutex
 	var wg1, wg2 sync.WaitGroup
 	wg1.Add(1)
 	wg2.Add(1)
@@ -61,6 +59,8 @@ func TestRunTickerTestContainers(t *testing.T) {
 		nil,
 	)
 	client := mockclient.NewMockClient()
+
+	// Iteration 1
 	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
 		Run(func(args mock.Arguments) {
 			assert.True(t, args[0].(container.Filter)(c))
@@ -70,27 +70,28 @@ func TestRunTickerTestContainers(t *testing.T) {
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
 		}).Return(&c, nil).Once()
-	ctx, cancel := context.WithCancel(context.Background())
 	client.On("StartContainerFrom", mock.AnythingOfType("container.Container")).
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.Name(), args.Get(0).(container.Container).Name())
-			locker.Lock()
-			if !touch {
-				touch = true
-				wg1.Done()
-			}
-			locker.Unlock()
+			wg1.Done()
+		}).Return(nil).Once()
+
+	// Iteration 2 - quit ticker
+	ctx, cancel := context.WithCancel(context.Background())
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
 			// stop ticker - do not run next iteration
 			cancel()
-		}).Return(nil).Once()
+		}).
+		Return([]container.Container{c}, nil).Once()
+
 	go func() {
-		RunTickerTestContainers(ctx, client, time.Second*10)
+		RunTickerTestContainers(ctx, client, time.Nanosecond*1)
 		wg2.Done()
 	}()
 	wg1.Wait()
 	wg2.Wait()
 
-	assert.True(t, touch)
 	client.AssertExpectations(t)
 }
 
@@ -203,6 +204,8 @@ func TestRunTickerTestContainers_FailedToFindBasicContainer(t *testing.T) {
 	)
 
 	client := mockclient.NewMockClient()
+
+	// Iteration 1
 	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
 		Run(func(args mock.Arguments) {
 			assert.True(t, args[0].(container.Filter)(c))
@@ -214,11 +217,18 @@ func TestRunTickerTestContainers_FailedToFindBasicContainer(t *testing.T) {
 		Run(func(args mock.Arguments) {
 			assert.Equal(t, c.ID(), args.Get(0).(string))
 			wg1.Done()
+		}).Return(&container.Container{}, errors.New("Expected :-)")).Once()
+
+	// Iteration 2 - quit ticker
+	client.On("ListContainers", mock.AnythingOfType(containerFilterType)).
+		Run(func(args mock.Arguments) {
 			// stop ticker - do not run next iteration
 			cancel()
-		}).Return(&container.Container{}, errors.New("Expected :-)")).Once()
+		}).
+		Return([]container.Container{}, nil).Once()
+
 	go func() {
-		RunTickerTestContainers(ctx, client, time.Second*10)
+		RunTickerTestContainers(ctx, client, time.Nanosecond*1)
 		wg2.Done()
 	}()
 	log.Info("Wating for inpect of ", c.Name())
