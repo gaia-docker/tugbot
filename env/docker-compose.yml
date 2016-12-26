@@ -1,17 +1,45 @@
 version: '2'
 services:
   elasticsearch:
-    build: elasticsearch/
+    image: elasticsearch:5.1.1
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - /usr/share/elasticsearch/data:/usr/share/elasticsearch/data
+    command: [elasticsearch, -Enetwork.host=0.0.0.0, -Enetwork.bind_host=0.0.0.0, -Ecluster.name=elasticlaster, -Ediscovery.zen.minimum_master_nodes=1]
+  kibana:
+    image: kibana:5.1.1
+    links:
+      - elasticsearch:elasticsearch
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
   tugbot-result-es:
     image: gaiadocker/tugbot-result-service-es
     ports:
       - "8080:8080"
     links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+  tugbot-collect:
+    image: gaiadocker/tugbot-collect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    links:
+      - tugbot-result-es
+    depends_on:
       - elasticsearch
   tugbot-run:
     image: gaiadocker/tugbot
@@ -21,9 +49,5 @@ services:
       TUGBOT_WEBHOOKS: "http://elasticsearch:9200"
     links:
       - tugbot-result-es
-  tugbot-collect:
-    image: gaiadocker/tugbot-collect
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    links:
-      - tugbot-result-es
+    depends_on:
+      - elasticsearch
