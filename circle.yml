@@ -6,7 +6,9 @@ machine:
     - docker
   environment:
     IMAGE_NAME: gaiadocker/tugbot
-    BUILDER_IMAGE_NAME: gaiadocker/tugbot-builder
+    PROJECT_NAME: tugbot
+    PROJECT_PATH: /go/src/github.com/gaia-docker/$PROJECT_NAME
+    BUILDER_IMAGE_NAME: gaia-docker/base-go-build
 checkout:
   post:
     - git fetch --unshallow || true
@@ -17,16 +19,14 @@ dependencies:
     # download update_service script
     - curl -LO https://raw.githubusercontent.com/gaia-adm/gaia-fleet/master/update_service.sh && chmod +x update_service.sh
     - chmod u+x script/go_build.sh script/coverage.sh
-    # create builder image
-    - docker build -t $BUILDER_IMAGE_NAME -f Build.Dockerfile .
     # run go build in a docker container
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot -w /go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/go_build.sh
+    - docker run --rm -v "$PWD":$PROJECT_PATH -w $PROJECT_PATH $BUILDER_IMAGE_NAME script/go_build.sh $PROJECT_NAME
     # create tugbot docker image
     - docker build -t $IMAGE_NAME .
 test:
   override:
     # run tugbot tests and generate junit.xml reports
-    - docker run --rm -v "$PWD":/go/src/github.com/gaia-docker/tugbot -w /go/src/github.com/gaia-docker/tugbot $BUILDER_IMAGE_NAME script/coverage.sh
+    - docker run --rm -v "$PWD":$PROJECT_PATH -w $PROJECT_PATH $BUILDER_IMAGE_NAME script/coverage.sh
   post:
     # copy test results
     - cp .cover/*_tests.xml $CIRCLE_TEST_REPORTS
