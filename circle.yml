@@ -8,7 +8,7 @@ machine:
     IMAGE_NAME: gaiadocker/tugbot
     PROJECT_NAME: tugbot
     PROJECT_PATH: /go/src/github.com/gaia-docker/$PROJECT_NAME
-    BUILDER_IMAGE_NAME: gaia-docker/base-go-build
+    BUILDER_IMAGE_NAME: gaiadocker/base-go-build
 checkout:
   post:
     - git fetch --unshallow || true
