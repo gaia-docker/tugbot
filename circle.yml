@@ -18,7 +18,6 @@ dependencies:
   override:
     # download update_service script
     - curl -LO https://raw.githubusercontent.com/gaia-adm/gaia-fleet/master/update_service.sh && chmod +x update_service.sh
-    - chmod u+x script/go_build.sh script/coverage.sh
     # run go build in a docker container
     - docker run --rm -v "$PWD":$PROJECT_PATH -w $PROJECT_PATH $BUILDER_IMAGE_NAME script/go_build.sh $PROJECT_NAME
     # create tugbot docker image
