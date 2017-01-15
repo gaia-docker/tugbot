@@ -39,13 +39,3 @@ imports:
   - unix
 - name: gopkg.in/olivere/elastic.v2
   version: b272fab42387a42585235d56f8c6b53b13ddfb7d
-- name: gopkg.in/olivere/elastic.v5
-  version: b272fab42387a42585235d56f8c6b53b13ddfb7d
-  subpackages:
-  - backoff
-  - uritemplates
-testImports:
-- name: k8s.io/kubernetes
-  version: 01b9d49673bb4746134d716ab17f95f9d32ca57a
-  subpackages:
-  - staging/src/k8s.io/client-go/1.4/_vendor/golang.org/x/net/context
