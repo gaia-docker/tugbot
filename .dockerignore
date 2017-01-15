@@ -6,3 +6,4 @@ circle.yml
 doc
 vendor
 README.md
+env
