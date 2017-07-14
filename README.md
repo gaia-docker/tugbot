@@ -5,7 +5,6 @@
 [![codecov](https://codecov.io/gh/gaia-docker/tugbot/branch/master/graph/badge.svg)](https://codecov.io/gh/gaia-docker/tugbot)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gaia-docker/tugbot)](https://goreportcard.com/report/github.com/gaia-docker/tugbot)
 [![Docker](https://img.shields.io/docker/pulls/gaiadocker/tugbot.svg)](https://hub.docker.com/r/gaiadocker/tugbot/)
-[![Docker Image Layers](https://imagelayers.io/badge/gaiadocker/tugbot:latest.svg)](https://imagelayers.io/?images=gaiadocker/tugbot:latest)
 
 ## Join the Community
 
@@ -55,7 +54,7 @@ All **Tugbot** labels must be prefixed with `tugbot-` to avoid potential conflic
 - `tugbot-event-docker-filter-image` - image name, comma separated list of names or [RE2 regexp](https://github.com/google/re2/wiki/Syntax) (use `re2:` prefix); use this filter to limit events coming from Docker images or containers created from these images
 - `tugbot-event-docker-filter-label` - filter events coming from resource (container, image, volume, network), that has specified labels (and optionally values); this can be comma separated list of `key=value` pairs.
 
-#####Example (Dockerfile):
+##### Example (Dockerfile):
 ```
 ...
 # this is Tugbot Test Container
@@ -77,7 +76,7 @@ LABEL tugbot-event-docker-filter-action=start,stop
 LABEL tugbot-event-docker-filter-container=re2:^hp
 ...
 ```
-#####Example (Dockerfile):
+##### Example (Dockerfile):
 ```
 ...
 # this is Tugbot Test Container
@@ -125,4 +124,3 @@ GLOBAL OPTIONS:
 ```
 $ docker run -d --name tugbot-run --log-driver=json-file -v /var/run/docker.sock:/var/run/docker.sock gaiadocker/tugbot:master
 ```
-
